@@ -1,0 +1,26 @@
+{
+    "id": "AEA41B9B",
+    "path": "~/data_projects/EIA STEO/graphs_base.R",
+    "project_path": "graphs_base.R",
+    "type": "r_source",
+    "hash": "2552135371",
+    "contents": "",
+    "dirty": false,
+    "created": 1623794154531.0,
+    "source_on_save": false,
+    "relative_order": 2,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "37,0",
+        "scrollLine": "5"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1623798702,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1623798702708,
+    "read_only": false,
+    "read_only_alternatives": []
+}
