@@ -14,7 +14,7 @@ navbar-links:
   Demand: "demand"
   WTI: "wti_fcast"
   Price War: "price_war"
-  Github: "https://github.com/leachandrew/STEO"
+  Github: "https://github.com/leachandrew/EIA-STEO"
 
 # --- Logo --- #
 
@@ -51,7 +51,7 @@ share-links-active:
 
 # How to display the link to your website in the footer
 # Remove this if you don't want a link in the footer
-url-pretty: "https://leachandrew.github.io/STEO/"
+url-pretty: "https://leachandrew.github.io/EIA-STEO"
 
 # Excerpt word length - Truncate the excerpt of each post on the feed page to the specified number of words
 excerpt_length: 50
