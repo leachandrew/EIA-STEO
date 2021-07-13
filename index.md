@@ -1,4 +1,4 @@
-Each month, the [Energy Information Administration (EIA)](https://www.eia.gov/) releases an extensive outlook for energy trade, consumption, produciton and prices: the [Short Term Energy Outlook (STEO)](https://www.eia.gov/outlooks/steo/).
+Each month, the [Energy Information Administration (EIA)](https://www.eia.gov/) releases an extensive outlook for energy trade, consumption, production and prices: the [Short Term Energy Outlook (STEO)](https://www.eia.gov/outlooks/steo/).
 
 They have been especially useful during the pandemic, and so this page serves to keep some of these up-to-date and to help me build some analysis.
 
