@@ -21,6 +21,7 @@ library(gghighlight)
 library(viridis)
 
 library(tidyverse)
+library(ggrepel)
 
 source("graphs_base.R")
 
@@ -534,19 +535,24 @@ ggsave(price_war, file="images/opec_non_opec_supply_small.png",width=16,height =
 #WTI PRICE FORECASTS
 
 #historical demand forecasts
-steo_old_WTI_forecasts<-filter(steo_data_fetch(ymd("2008-1-1")),forecast==1) %>%
-  rbind(filter(steo_data_fetch(ymd("2009-1-1")),forecast==1))%>%
-  rbind(filter(steo_data_fetch(ymd("2010-1-1")),forecast==1))%>%
-  rbind(filter(steo_data_fetch(ymd("2011-1-1")),forecast==1))%>%
-  rbind(filter(steo_data_fetch(ymd("2012-1-1")),forecast==1))%>%
+steo_old_WTI_forecasts<-filter(
+  steo_data_fetch(ymd("2010-1-1")),forecast==1) %>%
+  #rbind(filter(steo_data_fetch(ymd("2009-1-1")),forecast==1))%>%
+  #rbind(filter(steo_data_fetch(ymd("2010-1-1")),forecast==1))%>%
+  #rbind(filter(steo_data_fetch(ymd("2011-1-1")),forecast==1))%>%
+  #rbind(filter(steo_data_fetch(ymd("2012-1-1")),forecast==1))%>%
   rbind(filter(steo_data_fetch(ymd("2013-1-1")),forecast==1))%>%
   #rbind(filter(steo_data_fetch(ymd("2014-1-1")),forecast==1))%>%
-  rbind(filter(steo_data_fetch(ymd("2015-1-1")),forecast==1))%>%
+  #rbind(filter(steo_data_fetch(ymd("2015-1-1")),forecast==1))%>%
   rbind(filter(steo_data_fetch(ymd("2016-1-1")),forecast==1))%>%
-  rbind(filter(steo_data_fetch(ymd("2017-1-1")),forecast==1))%>%
-  rbind(filter(steo_data_fetch(ymd("2018-1-1")),forecast==1))%>%
+  #rbind(filter(steo_data_fetch(ymd("2017-1-1")),forecast==1))%>%
+  #rbind(filter(steo_data_fetch(ymd("2018-1-1")),forecast==1))%>%
   rbind(filter(steo_data_fetch(ymd("2019-1-1")),forecast==1))%>%
   rbind(filter(steo_data_fetch(ymd("2020-1-1")),forecast==1))%>%
+  rbind(filter(steo_data_fetch(ymd("2020-7-1")),forecast==1))%>%
+  rbind(filter(steo_data_fetch(ymd("2021-1-1")),forecast==1))%>%
+  rbind(filter(steo_data_fetch(ymd("2021-3-1")),forecast==1))%>%
+  rbind(filter(steo_data_fetch(ymd("2021-5-1")),forecast==1))%>%
   filter(code %in% c("WTIPUUS"))%>%
   mutate(value=as.numeric(value),
          Region=as_factor(Region),
@@ -609,6 +615,8 @@ wti_hist <- wti_hist %>% mutate(date=ymd(date),
 
 
 
+
+
 shape_set<-c(0,1,2,5,6,15,16,17,18,19)
 
 linetypes = c(apply(expand.grid(c(2,4), c(1,2,4,8,"A")), 1, paste, collapse=""), 
@@ -647,32 +655,131 @@ wti_graph<-ggplot(filter(wti_fc,forecast==1))+
        #subtitle=paste("Historic Values, EIA STEO Forecasts through ",format(max(supply_demand$version), "%B %Y"),", and ",nymex_version," settlements.",sep=""),
        caption="Source: Data via CME Group and EIA, graph by Andrew Leach.")
 wti_graph
-ggsave("wti_fcast_nymex.png",width=16,height = 9,dpi=600)
+ggsave("images/wti_fcast_nymex.png",width=16,height = 9,dpi=600)
 
 
 
 
 
-budget_2020 <- data.frame("Date" = c("2017-10-1"	,"2018-10-01","2019-10-01","2020-10-01","	2021-10-01","	2022-10-01"), 
+budget_2020 <- data.frame("Date" = c("2017-10-1"	,"2018-10-01","2019-10-01","2020-10-01","2021-10-01","2022-10-01"), 
                           "WTI_CAD" = c(68.83,82.27,76.82,75.82,80.52,81.29),
                           "WTI" = c(53.69,62.77,58.00,58.00,62.00,63.00),stringsAsFactors = F)
 
+
+
+budget_2021 <- data.frame("Date" = c("2018-10-01","2019-10-01","2020-10-01","2021-10-01","2022-10-01","2023-10-01"), 
+                          "WTI_CAD" = c(68.83,82.27,76.82,75.82,80.52,81.29),
+                          "WTI" = c(62.77,54.85,39.30,46.00,55.00,56.50),stringsAsFactors = F)
+
 budget_2020$Date<-ymd(budget_2020$Date)
+budget_2021$Date<-ymd(budget_2021$Date)
 
 budget_2020$version<-"Alberta Budget 2020"
 budget_2020$version<-factor(budget_2020$version)
 
+budget_2021$version<-"Alberta Budget 2021"
+budget_2021$version<-factor(budget_2021$version)
 
-budget_2020 <- budget_2020 %>% rename("value"="WTI") %>% select(-WTI_CAD) %>%filter(Date>=ymd("2019-10-01"))%>%
+
+budget_2020 <- budget_2020 %>% rename("value"="WTI") %>% select(-WTI_CAD) %>%filter(Date>=ymd("2019-02-01"))%>%
   mutate(forecast=3)
+
+budget_2021 <- budget_2021 %>% rename("value"="WTI") %>% select(-WTI_CAD) %>%filter(Date>=ymd("2020-02-01"))%>%
+  mutate(forecast=3)
+
 fc_date<-unique(as.character(nymex_wti$version))
 
 wti_graph+
-  geom_line(data=budget_2020,aes(Date,value,group=version,linetype="Z"),size=1.15)+
-  scale_linetype_manual("",values=c("solid","11","31"),labels=c("Historic WTI Prices",fc_date,"Alberta Budget 2020 Forecast"))
-ggsave("wti_fcast_nymex_AB.png",width=16,height = 9,dpi=300)
+  geom_line(data=budget_2020,aes(Date,value,group=version,linetype="Z1"),color="black",size=1.15)+
+  geom_point(aes(ymd("2021-02-25"),60),size=4,color="black")+
+  annotate("segment",x=ymd("2021-02-25"),y=60,xend=ymd("2021-02-25"),yend=110)+
+  geom_label(aes(x=ymd("2021-02-25"),y=60),nudge_y=50,size=4,label="Budget Day 2021")+
+  geom_line(data=budget_2021,aes(Date,value,group=version,linetype="Z2"),size=1.15,color="black")+
+  scale_linetype_manual("",values=c("solid","11","31","33"),labels=c("Historic WTI Prices",fc_date,"Alberta Budget 2020 Forecast","Alberta Budget 2021 Forecast"))
+  ggsave("images/wti_fcast_nymex_AB.png",width=16,height = 9,dpi=300)
 
-#END WTI PRICE
+  
+  #pandemic version
+  
+  
+  steo_old_WTI_forecasts<-filter(
+    steo_data_fetch(ymd("2019-12-1")),forecast==1) %>%
+    rbind(filter(steo_data_fetch(ymd("2020-2-1")),forecast==1))%>%
+    #rbind(filter(steo_data_fetch(ymd("2020-4-1")),forecast==1))%>%
+    #rbind(filter(steo_data_fetch(ymd("2020-7-1")),forecast==1))%>%
+    #rbind(filter(steo_data_fetch(ymd("2020-10-1")),forecast==1))%>%
+    #rbind(filter(steo_data_fetch(ymd("2021-1-1")),forecast==1))%>%
+    rbind(filter(steo_data_fetch(ymd("2021-2-1")),forecast==1))%>%
+    #rbind(filter(steo_data_fetch(ymd("2021-4-1")),forecast==1))%>%
+    filter(code %in% c("WTIPUUS"))%>%
+    mutate(value=as.numeric(value),
+           Region=as_factor(Region),
+           version=factor(paste(month.abb[month(version)],year(version),"STEO"),
+                          levels=paste(month.abb[month(unique(version))],year(unique(version)),"STEO")))
+  #Oct 2013 STEO Apr 2017 STEO Jan 2020 STEO
+  
+  wti_fc<-steo_data %>%filter(code %in% c("WTIPUUS"))%>%
+    mutate(Region=as_factor(Region),
+           version=factor(paste(format(max(version), "%b %Y"), "STEO"),
+                          levels=paste(month.abb[month(unique(version))],year(unique(version)),"STEO")))%>%
+    as.data.frame()%>%
+    bind_rows(steo_old_WTI_forecasts)%>%
+    mutate(version=mdy(paste(substr(as.character(version),1,3),1,substr(as.character(version),4,8),sep=" ")))%>%
+    mutate(version=factor(paste(month.abb[month(version)],year(version),"EIA STEO forecast",sep = " "),
+                          levels=paste(month.abb[month(unique(sort(version)))],year(unique(sort(version))),"EIA STEO forecast"))
+    )
+  
+  
+  wti_graph<-ggplot(filter(wti_fc,forecast==1))+
+    #geom_line(data=filter(wti_fcg,Date>ymd("2010-01-01"),Date<ymd("2030-1-1")),aes(Date,value,group=version,colour=version),linetype="solid",size=1.15)+
+    geom_line(data=filter(wti_hist,date>=ymd("2018-01-01")),aes(date,value,linetype="Monthly Average WTI Prices"),size=1.15)+
+    geom_line(data=nymex_wti,aes(Date,value,group=version,linetype=version),size=1.15)+
+    geom_line(aes(Date,value,group=version,colour=version),linetype="solid",size=1.15)+
+    geom_point(aes(Date,ifelse(month(Date) %in% c(6,12),value,NA),group=version,colour=version,shape=version),size=2.15)+
+    scale_x_date(breaks = "24 months",date_labels = "%Y",expand=c(0,0))+
+    scale_shape_manual("",values=c(shape_set,shape_set))+ #skipped 19
+    scale_y_continuous(breaks=pretty_breaks(),expand=c(0,0))+
+    # expand_limits(y=0)+
+    expand_limits(x=ymd("2022-01-01"))+
+    #scale_linetype_manual("",values=c(1,1))+
+    #scale_color_viridis("",discrete = T,option="C",direction = 1,end = .9)+
+    scale_color_manual("",values = c(colors_tableau10()[-8],colors_tableau10_light()[-8],"grey80"))+
+    #scale_color_manual("",values = c("grey80"))+
+    
+    scale_linetype_manual("",values=c("solid",linetypes[1]))+
+    #scale_fill_manual("",values=colors_tableau10()[2])+
+    #ajl_line()+
+    weekly_graphs()+
+    work_theme()+
+    theme(plot.caption = element_blank())+#no caption
+    guides(shape = guide_legend(keywidth = unit(1.6,"cm"),ncol = 2),
+           linetype = guide_legend(keywidth = unit(1.6,"cm"),nrow = 4),
+           colour = guide_legend(keywidth = unit(1.6,"cm"),ncol = 2),
+           NA
+    )+
+    labs(y="WTI Spot Monthly Average ($/bbl)",x="",
+         #title=paste("WTI Monthly Average Spot Price History and Forecasts"),
+         #subtitle=paste("Historic Values, EIA STEO Forecasts through ",format(max(supply_demand$version), "%B %Y"),", and ",nymex_version," settlements.",sep=""),
+         caption="Source: Data via CME Group and EIA, graph by Andrew Leach.")
+  
+  
+  
+  
+  wti_graph+
+    geom_line(data=budget_2020,aes(Date,value,group=version,linetype="Z1"),color="black",size=1.15)+
+    #geom_point(aes(ymd("2021-02-25"),60),size=4)+
+    expand_limits(y=90)+
+    annotate("segment",x=ymd("2021-02-25"),y=0,xend=ymd("2021-02-25"),yend=85)+
+    geom_label(aes(x=ymd("2021-02-25"),y=60),nudge_y=25,size=4,label="Budget Day\n2021")+
+    annotate("segment",x=ymd("2020-02-27"),y=0,xend=ymd("2020-02-27"),yend=85)+
+    geom_label(aes(x=ymd("2020-02-27"),y=60),nudge_y=25,size=4,label="Budget Day\n2020")+
+    geom_line(data=budget_2021,aes(Date,value,group=version,linetype="Z2"),size=1.15)+
+    scale_linetype_manual("",values=c("solid","11","31","33"),labels=c("Historic WTI Prices",fc_date,"Alberta Budget 2020 Forecast","Alberta Budget 2021 Forecast"))
+  ggsave("images/wti_fcast_nymex_AB_short.png",width=16,height = 9,dpi=300)
+  
+  
+  
+  #END WTI PRICE
 
 
 #aeo henry hub gas
