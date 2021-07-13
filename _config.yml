@@ -1,0 +1,80 @@
+# Name of website
+title: EIA Short Term Energy Outlook Scrapers and Graphs
+#subtitle: Graphs using Canada's NIR and emissions projections
+# Your name to show in the footer
+author: Andrew Leach
+#theme: jekyll-theme-cayman
+plugins:
+  - jekyll-remote-theme
+
+remote_theme: daattali/beautiful-jekyll
+
+navbar-links:
+  Supply: "supply"
+  Demand: "demand"
+  WTI: "wti_fcast"
+  Price War: "price_war"
+  Github: "https://github.com/leachandrew/STEO"
+
+# --- Logo --- #
+
+# Image to show in the navigation bar - works best with a square image
+# Remove this parameter if you don't want an image in the navbar
+#avatar: "images/icon_image.png"
+
+# By default, the image is cut into a circle. You can disable this behaviour by setting 'round-avatar: false'
+#round-avatar: false
+
+# If you want to have an image logo in the top-left corner instead of having the title of the website,
+# then specify the following parameter
+#title-img: /path/to/image
+
+# Fill in your Google Analytics ID to track your website using Google Analytics
+#google_analytics: "UA-10465863-4"
+
+# --- Footer social media links --- #
+
+# Select the social network links that you want to show in the footer.
+# Uncomment the links you want to show and add your information to each one.
+social-network-links:
+  email: "aleach@ualberta.ca"
+  github: leachandrew
+  twitter: andrew_leach
+  google-scholar: "citations?user=-as0RpQAAAAJ&hl"
+
+# Select which social network share links to show in posts
+share-links-active:
+  twitter: true
+  facebook: true
+  linkedin: true
+  vk: false
+
+# How to display the link to your website in the footer
+# Remove this if you don't want a link in the footer
+url-pretty: "https://leachandrew.github.io/STEO/"
+
+# Excerpt word length - Truncate the excerpt of each post on the feed page to the specified number of words
+excerpt_length: 50
+
+# Whether or not to show an excerpt for every blog post in the feed page
+feed_show_excerpt: true
+
+# Whether or not to show a list of tags below each post preview in the feed page
+feed_show_tags: true
+
+# Personalize the colours in your website. Colour values can be any valid CSS colour
+navbar-col: "#007C41"
+navbar-text-col: "#FFFFFF"
+navbar-border-col: "#FFDB05"
+footer-link-hover-col: "#FFDB05"
+page-col: "#FFFFFF"
+text-col: "#000000"
+link-col: "#7D9AAA"
+hover-col: "#7D9AAA"
+footer-col: "#007C41"
+footer-text-col: "#FFFFFF"
+footer-link-col: "#FFDB05"
+footer-link-hover-col: "#FFDB05"
+
+# Ruby Date Format to show dates of posts
+date_format: "%B %d, %Y"
