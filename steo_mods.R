@@ -769,6 +769,7 @@ wti_graph+
     geom_line(data=budget_2020,aes(Date,value,group=version,linetype="Z1"),color="black",size=1.15)+
     #geom_point(aes(ymd("2021-02-25"),60),size=4)+
     expand_limits(y=90)+
+    scale_x_date(limits = c(ymd("2018-01-01"),ymd("2024-01-01")),expand = c(0,0))+
     annotate("segment",x=ymd("2021-02-25"),y=0,xend=ymd("2021-02-25"),yend=85)+
     geom_label(aes(x=ymd("2021-02-25"),y=60),nudge_y=25,size=4,label="Budget Day\n2021")+
     annotate("segment",x=ymd("2020-02-27"),y=0,xend=ymd("2020-02-27"),yend=85)+
