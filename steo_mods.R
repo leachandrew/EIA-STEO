@@ -229,11 +229,11 @@ other_versions<-graph_df %>% filter(forecast==1,version!=forecast_label) %>% sel
 max_date<-max(graph_df$Date)
 
 demand<-ggplot(filter(graph_df,Region=="Total World Consumption",forecast==0))+
-  geom_line(aes(Date,value,group=version,linetype="Historic Data"),size=1.25)+
+  geom_line(aes(Date,value,group=version,linetype="Historic Data"),size=1.5)+
   geom_line(data=filter(graph_df,Region=="Total World Consumption",forecast==1),
-            aes(Date,value,group=version,colour=version),lty="11",size=1.25)+
+            aes(Date,value,group=version,colour=version),lty="11",size=1.5)+
   geom_point(data=filter(graph_df,Region=="Total World Consumption",forecast==1),
-             aes(Date,value,group=version,shape=version,colour=version,fill=version),size=2.5)+
+             aes(Date,value,group=version,shape=version,colour=version,fill=version),size=2.75)+
   
   #geom_line(data=filter(wti_fc,Date>ymd("2013-01-01"),forecast==0),aes(Date,value,linetype="A"),size=1.5,colour="black")+
   #geom_line(data=budget_2020,aes(Date,WTI_CAD,colour="AB_Budget_2020",linetype="AB_Budget_2020"),size=1.5)+
@@ -248,7 +248,14 @@ demand<-ggplot(filter(graph_df,Region=="Total World Consumption",forecast==0))+
   scale_linetype_manual("",values=c(1,2),labels=c("Historical Data","Forecast"))+
   #scale_fill_manual("",values=colors_tableau10()[2])+
   #ajl_line()+
-  theme_minimal()+weekly_graphs()+
+  theme_minimal()+
+  theme(
+   text = element_text(size = rel(4),face = "bold",color="black"),
+   plot.title = element_text(size = rel(4.5),face = "bold"),
+   legend.text = element_text(colour="black", size = rel(4), face = "bold"),
+   plot.caption = element_text(colour="black", size = rel(3.5), face = "bold"),
+   legend.position = "bottom",
+  )+
   guides(shape = guide_legend(keywidth = unit(1.6,"cm"),nrow = 2),
          linetype = guide_legend(keywidth = unit(1.6,"cm"),nrow = 2),
          colour = guide_legend(keywidth = unit(1.6,"cm"),override.aes = list(lty = "11")  ,nrow = 2),
@@ -259,8 +266,12 @@ demand<-ggplot(filter(graph_df,Region=="Total World Consumption",forecast==0))+
        caption="Source: Data via EIA STEO, graph by Andrew Leach.")
 
 demand+
-  scale_x_date(limits=c(ymd("2018-01-01"),max_date+months(3)),breaks = "12 months",date_labels = "%b\n%Y",expand = c(0,0))
-ggsave("images/demand.png",width=16,height = 10,dpi=300)
+  scale_x_date(limits=c(ymd("2018-01-01"),max_date+months(3)),breaks = "12 months",date_labels = "%b\n%Y",expand = c(0,0))+
+  #theme(
+   # text = element_text(size = 16,face = "bold",color="black")
+  #)+
+  NULL
+ggsave("images/demand.png",width=18,height = 9,dpi=300)
 
 demand+
   scale_x_date(limits=c(ymd("2005-01-01"),max_date+months(3)),breaks = "12 months",date_labels = "%b\n%Y",expand = c(0,0))
@@ -986,7 +997,7 @@ ggplot(filter(wti_wide,year(date)%%1==0,year!=2020))+
        title=paste("EIA and CER WTI Outlook"),
        subtitle=paste("Historic and forward market settlement prices, CER Energy Futures 2020 and EIA Annual Energy Outlook (AEO) forecasts"),
        caption="Data via CME Group, Canadian Energy Regulator (CER), and the US Energy Information Administration (EIA). Graph by Andrew Leach.")
-ggsave("images/wti_ribbon_nymex.png",dpi=300,width = 16)
+ggsave("images/wti_ribbon_nymex.png",dpi=300,width = 16,height=9)
 
 
 
