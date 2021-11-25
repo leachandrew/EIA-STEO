@@ -261,6 +261,8 @@ demand<-ggplot(filter(graph_df,Region=="Total World Consumption",forecast==0))+
 demand+
   scale_x_date(limits=c(ymd("2018-01-01"),max_date+months(3)),breaks = "12 months",date_labels = "%b\n%Y",expand = c(0,0))
 ggsave("images/demand.png",width=16,height = 10,dpi=300)
+ggsave("images/demand_small.jpg",width=16,height = 10)
+
 
 demand+
   scale_x_date(limits=c(ymd("2005-01-01"),max_date+months(3)),breaks = "12 months",date_labels = "%b\n%Y",expand = c(0,0))
@@ -303,7 +305,7 @@ supply<-ggplot(filter(graph_df,Region=="Total World Supply",forecast==0))+
 supply+
   scale_x_date(limits=c(ymd("2018-01-01"),max_date+months(3)),breaks = "12 months",date_labels = "%b\n%Y",expand = c(0,0))
 ggsave("images/supply.png",width=16,height = 10,dpi=300)
-
+ggsave("images/supply_small.png",width=16,height = 10,dpi=150)
 supply+
   scale_x_date(limits=c(ymd("2005-01-01"),max_date+months(3)),breaks = "12 months",date_labels = "%b\n%Y",expand = c(0,0))
 ggsave("images/supply_long.png",width=16,height = 10,dpi=300)
