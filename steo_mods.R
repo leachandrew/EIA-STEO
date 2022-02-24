@@ -25,6 +25,11 @@ library(ggrepel)
 
 source("graphs_base.R")
 
+devtools::install_github("leachandrew/pdfetch")
+
+res<-150
+
+
 
 eia_fix_dates<-function(data_sent)
 {
@@ -203,7 +208,7 @@ steo_old_sd_forecasts<-filter(steo_data_fetch(ymd("2020-1-1")),Date>=ymd("2015-0
   #rbind(filter(steo_data_fetch(ymd("2020-12-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
   rbind(filter(steo_data_fetch(ymd("2021-1-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
   #rbind(filter(steo_data_fetch(ymd("2021-2-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
-  #rbind(filter(steo_data_fetch(ymd("2021-3-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
+  rbind(filter(steo_data_fetch(ymd("2021-6-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
   filter(code %in% c("patc_world","papr_world"))%>%
   mutate(Region=as_factor(Region),
          Region=fct_collapse(Region,`Total World Supply` = c("Total World Supply", "Total World Production")),
@@ -260,13 +265,13 @@ demand<-ggplot(filter(graph_df,Region=="Total World Consumption",forecast==0))+
 
 demand+
   scale_x_date(limits=c(ymd("2018-01-01"),max_date+months(3)),breaks = "12 months",date_labels = "%b\n%Y",expand = c(0,0))
-ggsave("images/demand.png",width=16,height = 10,dpi=300)
+ggsave("images/demand.png",width=16,height = 10,dpi=res)
 ggsave("images/demand_small.jpg",width=16,height = 10)
 
 
 demand+
   scale_x_date(limits=c(ymd("2005-01-01"),max_date+months(3)),breaks = "12 months",date_labels = "%b\n%Y",expand = c(0,0))
-ggsave("images/demand_long.png",width=16,height = 10,dpi=300)
+ggsave("images/demand_long.png",width=16,height = 10,dpi=res)
 
 
 supply<-ggplot(filter(graph_df,Region=="Total World Supply",forecast==0))+
@@ -304,11 +309,11 @@ supply<-ggplot(filter(graph_df,Region=="Total World Supply",forecast==0))+
 
 supply+
   scale_x_date(limits=c(ymd("2018-01-01"),max_date+months(3)),breaks = "12 months",date_labels = "%b\n%Y",expand = c(0,0))
-ggsave("images/supply.png",width=16,height = 10,dpi=300)
-ggsave("images/supply_small.png",width=16,height = 10,dpi=150)
+ggsave("images/supply.png",width=16,height = 10,dpi=res)
+ggsave("images/supply_small.png",width=16,height = 10,dpi=120)
 supply+
   scale_x_date(limits=c(ymd("2005-01-01"),max_date+months(3)),breaks = "12 months",date_labels = "%b\n%Y",expand = c(0,0))
-ggsave("images/supply_long.png",width=16,height = 10,dpi=300)
+ggsave("images/supply_long.png",width=16,height = 10,dpi=res)
 
 
 
@@ -391,7 +396,9 @@ ggplot(filter(graph_df,Region=="Total World Consumption",forecast==0,Date>=ymd("
        #subtitle=paste("In early 2020, the COVID-19 pandemic dropped global oil demand to levels not seen since 2004. The initially-forecast rapid recovery has not materialized. What will 2021 bring?"),
        #caption="Source: Historical data and forecasts via Energy Information Administration (EIA) Short-term Energy Outlook (STEO), graph by Andrew Leach."
        NULL)
-ggsave("images/macleans_2021.png",width=16,height = 10,dpi=300)
+ggsave("images/macleans_2021.png",width=16,height = 10,dpi=res)
+
+
 
 #OPEC/Non-OPEC Split
 
@@ -531,8 +538,8 @@ ncol=1,heights=c(3.75,5))
 )
 
 price_war <- arrangeGrob(price_war) #generates g
-ggsave(price_war,file="images/opec_non_opec_supply.png",width=16,height = 9,dpi=600)
-ggsave(price_war, file="images/opec_non_opec_supply_small.png",width=16,height = 9,dpi=200)
+ggsave(price_war,file="images/opec_non_opec_supply.png",width=16,height = 9,dpi=res)
+ggsave(price_war, file="images/opec_non_opec_supply_small.png",width=16,height = 9,dpi=res)
 
 #WTI PRICE FORECASTS
 
@@ -604,7 +611,12 @@ nymex_version<-as.character(unique(nymex_wti$version))
 
 #WTI Historic prices
 #PET.RWTC.M
-wti_hist<-pdfetch_EIA(c("PET.RWTC.D"),KEY)
+wti_hist<-pdfetch_EIA(c("PET.RWTC.M"),KEY)
+
+
+pdfetch_EIA(c("ELEC.GEN.ALL-AK-99.A","ELEC.GEN.ALL-AK-99.Q"), KEY)
+
+
 wti_hist<- setNames(wti_hist, "value")
 wti_hist<-data.frame(date=index(wti_hist), coredata(wti_hist))
 wti_hist <- wti_hist %>% mutate(date=ymd(date),
@@ -657,7 +669,7 @@ wti_graph<-ggplot(filter(wti_fc,forecast==1))+
        #subtitle=paste("Historic Values, EIA STEO Forecasts through ",format(max(supply_demand$version), "%B %Y"),", and ",nymex_version," settlements.",sep=""),
        caption="Source: Data via CME Group and EIA, graph by Andrew Leach.")
 wti_graph
-ggsave("images/wti_fcast_nymex.png",width=16,height = 9,dpi=600)
+ggsave("images/wti_fcast_nymex.png",width=16,height = 9,dpi=res)
 
 
 
@@ -698,7 +710,7 @@ wti_graph+
   geom_label(aes(x=ymd("2021-02-25"),y=60),nudge_y=50,size=4,label="Budget Day 2021")+
   geom_line(data=budget_2021,aes(Date,value,group=version,linetype="Z2"),size=1.15,color="black")+
   scale_linetype_manual("",values=c("solid","11","31","33"),labels=c("Historic WTI Prices",fc_date,"Alberta Budget 2020 Forecast","Alberta Budget 2021 Forecast"))
-  ggsave("images/wti_fcast_nymex_AB.png",width=16,height = 9,dpi=300)
+  ggsave("images/wti_fcast_nymex_AB.png",width=16,height = 9,dpi=res)
 
   
   #pandemic version
@@ -778,7 +790,7 @@ wti_graph+
     geom_label(aes(x=ymd("2020-02-27"),y=60),nudge_y=25,size=4,label="Budget Day\n2020")+
     geom_line(data=budget_2021,aes(Date,value,group=version,linetype="Z2"),size=1.15)+
     scale_linetype_manual("",values=c("solid","11","31","33"),labels=c("Historic WTI Prices",fc_date,"Alberta Budget 2020 Forecast","Alberta Budget 2021 Forecast"))
-  ggsave("images/wti_fcast_nymex_AB_short.png",width=16,height = 9,dpi=300)
+  ggsave("images/wti_fcast_nymex_AB_short.png",width=16,height = 9,dpi=res)
   
   
   
@@ -906,6 +918,8 @@ cer_2020<-read_csv("https://www.cer-rec.gc.ca/open/energy/energyfutures2020/benc
 cer_fx<-read_csv("https://www.cer-rec.gc.ca/open/energy/energyfutures2020/macro-indicators-2020.csv")%>%clean_names()%>%filter(region=="Canada",variable %in% c("Consumer Price Index (2002=100)","Canada-US Exchange Rate (C$/US$)"))%>%
   mutate(date=ymd(paste(year,"-12-31")))
 
+cer_fx<-read_csv("https://www.cer-rec.gc.ca/open/energy/energyfutures2020/macro-indicators-2020.csv")%>%clean_names()%>%filter(region=="Canada",variable %in% c("Consumer Price Index (2002=100)","Canada-US Exchange Rate (C$/US$)"))%>%
+  mutate(date=ymd(paste(year,"-12-31")))
 
 v_int<-c("West Texas Intermediate (WTI) - US$/bbl", "Western Canadian Select (WCS) - US$/bbl","Nova Inventory Transfer (NIT) - US$/MMBtu", "Canada-US Exchange Rate (C$/US$)","Consumer Price Index (2002=100)")
 
@@ -913,6 +927,10 @@ v_int<-c("West Texas Intermediate (WTI) - US$/bbl", "Western Canadian Select (WC
 cer_data<-read_csv("https://www.cer-rec.gc.ca/open/energy/energyfutures2020/benchmark-prices-2020.csv")%>%clean_names()%>%
   mutate(date=ymd(paste(year,"-12-31")))%>% bind_rows(cer_fx%>%select(-region))%>%select(-year)%>% filter(variable %in% v_int)%>%
   pivot_wider(id=c(-scenario,-variable),values_from=value,names_from=c(variable,scenario))
+
+
+
+
 
 #convert NIT to cad
 cer_data$`Nova Inventory Transfer (NIT) - CA$/GJ_Evolving`<-cer_data$`Nova Inventory Transfer (NIT) - US$/MMBtu_Evolving`*cer_data$`Canada-US Exchange Rate (C$/US$)_Evolving`*0.94708628903179
@@ -988,7 +1006,7 @@ ggplot(filter(wti_wide,year(date)%%1==0,year!=2020))+
        title=paste("EIA and CER WTI Outlook"),
        subtitle=paste("Historic and forward market settlement prices, CER Energy Futures 2020 and EIA Annual Energy Outlook (AEO) forecasts"),
        caption="Data via CME Group, Canadian Energy Regulator (CER), and the US Energy Information Administration (EIA). Graph by Andrew Leach.")
-ggsave("images/wti_ribbon_nymex.png",dpi=300,width = 16)
+ggsave("images/wti_ribbon_nymex.png",dpi=res,width = 16)
 
 
 
