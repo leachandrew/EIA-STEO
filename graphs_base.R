@@ -169,13 +169,13 @@ weekly_graphs<-function(caption_align=1){
     legend.position = "bottom",
     legend.margin=margin(c(0,0,0,0),unit="cm"),
     legend.text = element_text(colour="black", size = 14, face = "bold"),
-    plot.caption = element_text(size = 14, face = "italic",hjust=caption_align),
-    plot.title = element_text(face = "bold"),
-    plot.subtitle = element_text(size = 16, face = "italic"),
     panel.grid.minor = element_blank(),
-    text = element_text(size = 14,face = "bold"),
-    axis.title.x = element_text(size = 14,face = "bold", colour="black",margin = margin(t = 15, b = 0)),
-    axis.text = element_text(size = 14,face = "bold", colour="black",margin = margin(t = 10, b = 10)),
+    text = element_text(size = 16,face = "bold"),
+    plot.caption = element_text(size = 14, face = "italic",hjust=caption_align),
+    plot.title = element_text(size = 16,face = "bold"),
+    plot.subtitle = element_text(size = 16, face = "italic"),
+    axis.title.x = element_text(margin = margin(t = 15, b = 0)),
+    axis.text = element_text(margin = margin(t = 10, b = 10)),
   )
 }
 
