@@ -611,15 +611,26 @@ nymex_version<-as.character(unique(nymex_wti$version))
 
 #WTI Historic prices
 #PET.RWTC.M
+wti_today<-pdfetch_EIA(c("PET.RWTC.D"),KEY)
 wti_hist<-pdfetch_EIA(c("PET.RWTC.M"),KEY)
 
 
-pdfetch_EIA(c("ELEC.GEN.ALL-AK-99.A","ELEC.GEN.ALL-AK-99.Q"), KEY)
+
+
+
+
+
+#pdfetch_EIA(c("ELEC.GEN.ALL-AK-99.A","ELEC.GEN.ALL-AK-99.Q"), KEY)
 
 
 wti_hist<- setNames(wti_hist, "value")
+wti_today<- setNames(wti_today, "value")
 wti_hist<-data.frame(date=index(wti_hist), coredata(wti_hist))
-wti_hist <- wti_hist %>% mutate(date=ymd(date),
+wti_today<-data.frame(date=index(wti_today), coredata(wti_today))
+
+
+wti_hist <- wti_hist %>% bind_rows(tail(wti_today,1))%>%
+  mutate(date=ymd(date),
                                 case = "NYMEX Historic WTI Price Data",
                                 year=year(date),month=month(date))%>%
   group_by(month,year)%>% summarize(value=mean(value,na.rm = T))%>%
@@ -659,9 +670,9 @@ wti_graph<-ggplot(filter(wti_fc,forecast==1))+
   weekly_graphs()+
   work_theme()+
   theme(plot.caption = element_blank())+#no caption
-  guides(shape = guide_legend(keywidth = unit(1.6,"cm"),ncol = 2),
-         linetype = guide_legend(keywidth = unit(1.6,"cm"),nrow = 4),
-         colour = guide_legend(keywidth = unit(1.6,"cm"),ncol = 2),
+  guides(linetype = guide_legend(keywidth = unit(2.6,"cm"),nrow = 5),
+         shape = guide_legend(keywidth = unit(2.6,"cm"),nrow =  4),
+         colour = guide_legend(keywidth = unit(2.6,"cm"),nrow = 4),
          NA
   )+
   labs(y="WTI Spot Monthly Average ($/bbl)",x="",
@@ -692,12 +703,16 @@ budget_2022 <- data.frame("Date" = c("2019-10-01","2020-10-01","2021-10-01","202
 
 budget_2020$Date<-ymd(budget_2020$Date)
 budget_2021$Date<-ymd(budget_2021$Date)
+budget_2022$Date<-ymd(budget_2022$Date)
 
 budget_2020$version<-"Alberta Budget 2020"
 budget_2020$version<-factor(budget_2020$version)
 
 budget_2021$version<-"Alberta Budget 2021"
 budget_2021$version<-factor(budget_2021$version)
+
+budget_2022$version<-"Alberta Budget 2022"
+budget_2022$version<-factor(budget_2022$version)
 
 
 budget_2020 <- budget_2020 %>% rename("value"="WTI") %>% select(-WTI_CAD) %>%filter(Date>=ymd("2019-02-01"))%>%
@@ -706,17 +721,30 @@ budget_2020 <- budget_2020 %>% rename("value"="WTI") %>% select(-WTI_CAD) %>%fil
 budget_2021 <- budget_2021 %>% rename("value"="WTI") %>% select(-WTI_CAD) %>%filter(Date>=ymd("2020-02-01"))%>%
   mutate(forecast=3)
 
+budget_2022 <- budget_2022 %>% rename("value"="WTI") %>% select(-WTI_CAD) %>%filter(Date>=ymd("2021-02-01"))%>%
+  mutate(forecast=3)
+
+
 fc_date<-unique(as.character(nymex_wti$version))
 
 wti_graph+
   geom_line(data=budget_2020,aes(Date,value,group=version,linetype="Z1"),color="black",size=1.15)+
-  geom_point(aes(ymd("2021-02-25"),60),size=4,color="black")+
-  annotate("segment",x=ymd("2021-02-25"),y=60,xend=ymd("2021-02-25"),yend=110)+
-  geom_label(aes(x=ymd("2021-02-25"),y=60),nudge_y=50,size=4,label="Budget Day 2021")+
+  geom_point(aes(ymd("2022-02-25"),92.1),size=4,color="black")+
+  annotate("segment",x=ymd("2022-02-25"),y=92.1,xend=ymd("2022-02-25"),yend=92.10+50)+
   geom_line(data=budget_2021,aes(Date,value,group=version,linetype="Z2"),size=1.15,color="black")+
-  scale_linetype_manual("",values=c("solid","11","31","33"),labels=c("Historic WTI Prices",fc_date,"Alberta Budget 2020 Forecast","Alberta Budget 2021 Forecast"))
+  geom_label(aes(x=ymd("2022-02-24"),y=92.1),nudge_y=50,size=4,label="Budget Day 2022")+
+  geom_line(data=budget_2022,aes(Date,value,group=version,linetype="Z3"),size=1.15,color="black")+
+  scale_x_date(breaks = "24 months",date_labels = "%Y",expand=c(0,0),limits=c(ymd("2005-01-01","2024-10-01")))+
+  expand_limits(x=ymd("2025-01-01"))+
+  scale_linetype_manual("",values=c("solid","11","31","33","52"),labels=c("Historic WTI Monthly Prices",fc_date,"Alberta Budget 2020 Forecast","Alberta Budget 2021 Forecast","Alberta Budget 2022 Forecast"))+
+  guides(linetype = guide_legend(keywidth = unit(2.6,"cm"),nrow = 5,order = 1),
+       shape = guide_legend(keywidth = unit(2.6,"cm"),nrow =  4),
+       colour = guide_legend(keywidth = unit(2.6,"cm"),nrow = 4),
+       NA
+)
   ggsave("images/wti_fcast_nymex_AB.png",width=16,height = 9,dpi=res)
-
+  ggsave("images/wti_fcast_nymex_AB.jpg",width=16,height = 9,dpi=res)
+  
   
   #pandemic version
   
