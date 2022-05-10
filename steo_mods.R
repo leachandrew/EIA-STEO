@@ -558,29 +558,34 @@ ggsave("images/demand_small.jpg",width=16,height = 10)
   #WTI PRICE FORECASTS
   
   #historical demand forecasts
-  steo_old_WTI_forecasts<-filter(
-    steo_data_fetch(ymd("2010-1-1")),forecast==1) %>%
-    #rbind(filter(steo_data_fetch(ymd("2009-1-1")),forecast==1))%>%
-    #rbind(filter(steo_data_fetch(ymd("2010-1-1")),forecast==1))%>%
-    #rbind(filter(steo_data_fetch(ymd("2011-1-1")),forecast==1))%>%
-    #rbind(filter(steo_data_fetch(ymd("2012-1-1")),forecast==1))%>%
-    rbind(filter(steo_data_fetch(ymd("2013-1-1")),forecast==1))%>%
-    #rbind(filter(steo_data_fetch(ymd("2014-1-1")),forecast==1))%>%
-    #rbind(filter(steo_data_fetch(ymd("2015-1-1")),forecast==1))%>%
-    rbind(filter(steo_data_fetch(ymd("2016-1-1")),forecast==1))%>%
-    #rbind(filter(steo_data_fetch(ymd("2017-1-1")),forecast==1))%>%
-    #rbind(filter(steo_data_fetch(ymd("2018-1-1")),forecast==1))%>%
-    rbind(filter(steo_data_fetch(ymd("2019-1-1")),forecast==1))%>%
-    rbind(filter(steo_data_fetch(ymd("2020-1-1")),forecast==1))%>%
-    rbind(filter(steo_data_fetch(ymd("2020-7-1")),forecast==1))%>%
-    rbind(filter(steo_data_fetch(ymd("2021-1-1")),forecast==1))%>%
-    rbind(filter(steo_data_fetch(ymd("2021-3-1")),forecast==1))%>%
-    rbind(filter(steo_data_fetch(ymd("2021-5-1")),forecast==1))%>%
-    filter(code %in% c("WTIPUUS"))%>%
-    mutate(value=as.numeric(value),
+  get_old_wti<-function(){
+    steo_old_WTI_forecasts<-
+      filter(steo_data_fetch(ymd("2009-1-1")),forecast==1) %>%
+      #bind_rows(filter(steo_data_fetch(ymd("2009-1-1")),forecast==1))%>%
+      bind_rows(filter(steo_data_fetch(ymd("2011-1-1")),forecast==1))%>%
+      ##bind_rows(filter(steo_data_fetch(ymd("2012-1-1")),forecast==1))%>%
+      bind_rows(filter(steo_data_fetch(ymd("2013-1-1")),forecast==1))%>%
+      #bind_rows(filter(steo_data_fetch(ymd("2014-1-1")),forecast==1))%>%
+      bind_rows(filter(steo_data_fetch(ymd("2015-1-1")),forecast==1))%>%
+      #bind_rows(filter(steo_data_fetch(ymd("2016-1-1")),forecast==1))%>%
+      bind_rows(filter(steo_data_fetch(ymd("2017-1-1")),forecast==1))%>%
+      #bind_rows(filter(steo_data_fetch(ymd("2018-1-1")),forecast==1))%>%
+      bind_rows(filter(steo_data_fetch(ymd("2019-1-1")),forecast==1))%>%
+      #bind_rows(filter(steo_data_fetch(ymd("2020-1-1")),forecast==1))%>%
+      bind_rows(filter(steo_data_fetch(ymd("2021-1-1")),forecast==1))%>%
+      filter(code %in% c("WTIPUUS"))%>%
+      mutate(value=as.numeric(value),
            Region=as_factor(Region),
            version=factor(paste(month.abb[month(version)],year(version),"STEO"),
                           levels=paste(month.abb[month(unique(version))],year(unique(version)),"STEO")))
+  steo_old_WTI_forecasts
+    }
+  
+  steo_old_WTI_forecasts<-get_old_wti()
+  save(steo_old_WTI_forecasts,"old_WTI.RData")
+  
+  load("old_WTI.RData")
+  
   #Oct 2013 STEO Apr 2017 STEO Jan 2020 STEO
   
   wti_fc<-steo_data %>%filter(code %in% c("WTIPUUS"))%>%
@@ -682,7 +687,7 @@ ggsave("images/demand_small.jpg",width=16,height = 10)
     #scale_fill_manual("",values=colors_tableau10()[2])+
     #ajl_line()+
     weekly_graphs()+
-    work_theme()+
+    #work_theme()+
     theme(plot.caption = element_blank())+#no caption
     guides(linetype = guide_legend(keywidth = unit(2.6,"cm"),nrow = 5),
            shape = guide_legend(keywidth = unit(2.6,"cm"),nrow =  4),
