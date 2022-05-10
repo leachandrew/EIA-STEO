@@ -581,9 +581,8 @@ ggsave("images/demand_small.jpg",width=16,height = 10)
   steo_old_WTI_forecasts
     }
   
-  steo_old_WTI_forecasts<-get_old_wti()
-  save(steo_old_WTI_forecasts,"old_WTI.RData")
-  
+  #steo_old_WTI_forecasts<-get_old_wti()
+  #save(steo_old_WTI_forecasts,file="old_WTI.RData")
   load("old_WTI.RData")
   
   #Oct 2013 STEO Apr 2017 STEO Jan 2020 STEO
