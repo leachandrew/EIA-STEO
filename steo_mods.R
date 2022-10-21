@@ -279,13 +279,13 @@ demand<-ggplot(filter(graph_df,Region=="Total World Consumption",forecast==0))+
 
 demand+
   scale_x_date(limits=c(ymd("2018-01-01"),max_date+months(3)),breaks = "12 months",date_labels = "%b\n%Y",expand = c(0,0))
-ggsave("images/demand.png",width=16,height = 10,dpi=res)
-ggsave("images/demand_small.jpg",width=16,height = 10)
+ggsave("images/demand.png",width=16,height = 10,dpi=res,bg="white")
+ggsave("images/demand_small.jpg",width=16,height = 10,bg="white")
 
 
   demand+
     scale_x_date(limits=c(ymd("2005-01-01"),max_date+months(3)),breaks = "12 months",date_labels = "%b\n%Y",expand = c(0,0))
-  ggsave("images/demand_long.png",width=16,height = 10,dpi=res)
+  ggsave("images/demand_long.png",width=16,height = 10,dpi=res,bg="white")
   
   
   supply<-ggplot(filter(graph_df,Region=="Total World Supply",forecast==0))+
@@ -323,11 +323,11 @@ ggsave("images/demand_small.jpg",width=16,height = 10)
   
   supply+
     scale_x_date(limits=c(ymd("2018-01-01"),max_date+months(3)),breaks = "12 months",date_labels = "%b\n%Y",expand = c(0,0))
-  ggsave("images/supply.png",width=16,height = 10,dpi=res)
-  ggsave("images/supply_small.png",width=16,height = 10,dpi=120)
+  ggsave("images/supply.png",width=16,height = 10,dpi=res,bg="white")
+  ggsave("images/supply_small.png",width=16,height = 10,dpi=120,bg="white")
   supply+
     scale_x_date(limits=c(ymd("2005-01-01"),max_date+months(3)),breaks = "12 months",date_labels = "%b\n%Y",expand = c(0,0))
-  ggsave("images/supply_long.png",width=16,height = 10,dpi=res)
+  ggsave("images/supply_long.png",width=16,height = 10,dpi=res,bg="white")
   
   
   
@@ -410,7 +410,7 @@ ggsave("images/demand_small.jpg",width=16,height = 10)
          #subtitle=paste("In early 2020, the COVID-19 pandemic dropped global oil demand to levels not seen since 2004. The initially-forecast rapid recovery has not materialized. What will 2021 bring?"),
          #caption="Source: Historical data and forecasts via Energy Information Administration (EIA) Short-term Energy Outlook (STEO), graph by Andrew Leach."
          NULL)
-  ggsave("images/macleans_2021.png",width=16,height = 10,dpi=res)
+  ggsave("images/macleans_2021.png",width=16,height = 10,dpi=res,bg="white")
   
   
   
@@ -552,8 +552,8 @@ ggsave("images/demand_small.jpg",width=16,height = 10)
   )
   
   price_war <- arrangeGrob(price_war) #generates g
-  ggsave(price_war,file="images/opec_non_opec_supply.png",width=16,height = 9,dpi=res)
-  ggsave(price_war, file="images/opec_non_opec_supply_small.png",width=16,height = 9,dpi=res)
+  ggsave(price_war,file="images/opec_non_opec_supply.png",width=16,height = 9,dpi=res,bg="white")
+  ggsave(price_war, file="images/opec_non_opec_supply_small.png",width=16,height = 9,dpi=res,bg="white")
   
   #WTI PRICE FORECASTS
   
@@ -698,7 +698,7 @@ ggsave("images/demand_small.jpg",width=16,height = 10)
          #subtitle=paste("Historic Values, EIA STEO Forecasts through ",format(max(supply_demand$version), "%B %Y"),", and ",nymex_version," settlements.",sep=""),
          caption="Source: Data via CME Group and EIA, graph by Andrew Leach.")
   wti_graph
-  ggsave("images/wti_fcast_nymex.png",width=16,height = 9,dpi=res)
+  ggsave("images/wti_fcast_nymex.png",width=16,height = 9,dpi=res,bg="white")
   
   
   
@@ -760,8 +760,8 @@ ggsave("images/demand_small.jpg",width=16,height = 10)
          colour = guide_legend(keywidth = unit(2.6,"cm"),nrow = 4),
          NA
   )
-    ggsave("images/wti_fcast_nymex_AB.png",width=16,height = 9,dpi=res)
-    ggsave("images/wti_fcast_nymex_AB.jpg",width=16,height = 9,dpi=res)
+    ggsave("images/wti_fcast_nymex_AB.png",width=16,height = 9,dpi=res,bg="white")
+    ggsave("images/wti_fcast_nymex_AB.jpg",width=16,height = 9,dpi=res,bg="white")
     
     
     #pandemic version
@@ -841,7 +841,7 @@ ggsave("images/demand_small.jpg",width=16,height = 10)
       geom_label(aes(x=ymd("2020-02-27"),y=60),nudge_y=25,size=4,label="Budget Day\n2020")+
       geom_line(data=budget_2021,aes(Date,value,group=version,linetype="Z2"),size=1.15)+
       scale_linetype_manual("",values=c("solid","11","31","33"),labels=c("Historic WTI Prices",fc_date,"Alberta Budget 2020 Forecast","Alberta Budget 2021 Forecast"))
-    ggsave("images/wti_fcast_nymex_AB_short.png",width=16,height = 9,dpi=res)
+    ggsave("images/wti_fcast_nymex_AB_short.png",width=16,height = 9,dpi=res,bg="white")
     
     
     
@@ -949,5 +949,6 @@ ggsave("images/demand_small.jpg",width=16,height = 10)
   
   
 
+  
   
   
