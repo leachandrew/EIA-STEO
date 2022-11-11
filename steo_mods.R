@@ -223,6 +223,7 @@ steo_old_sd_forecasts<-filter(steo_data_fetch(ymd("2020-1-1")),Date>=ymd("2015-0
   rbind(filter(steo_data_fetch(ymd("2021-1-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
   rbind(filter(steo_data_fetch(ymd("2021-6-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
   rbind(filter(steo_data_fetch(ymd("2022-1-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
+  rbind(filter(steo_data_fetch(ymd("2022-6-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
   filter(code %in% c("patc_world","papr_world"))%>%
   mutate(Region=as_factor(Region),
          Region=fct_collapse(Region,`Total World Supply` = c("Total World Supply", "Total World Production")),
