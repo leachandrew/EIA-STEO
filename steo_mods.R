@@ -343,7 +343,7 @@ ggsave("images/demand_small.jpg",width=16,height = 10,bg="white")
     #rbind(filter(steo_data_fetch(ymd("2020-6-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
     #rbind(filter(steo_data_fetch(ymd("2020-7-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
     #rbind(filter(steo_data_fetch(ymd("2020-8-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
-    rbind(filter(steo_data_fetch(ymd("2020-11-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
+    #rbind(filter(steo_data_fetch(ymd("2020-11-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
     filter(code %in% c("patc_world","papr_world"))%>%
     mutate(Region=as_factor(Region),
            Region=fct_collapse(Region,`Total World Supply` = c("Total World Supply", "Total World Production")),
