@@ -208,7 +208,7 @@ min_forecast<-min(supply_demand$Date[supply_demand$forecast==1])
 max_forecast<-max(supply_demand$Date[supply_demand$forecast==1])
 
 #historical demand forecasts
-steo_old_sd_forecasts<-filter(steo_data_fetch(ymd("2020-1-1")),Date>=ymd("2015-01-01"),forecast==1) %>%
+steo_old_sd_forecasts<-filter(steo_data_fetch(ymd("2019-10-1")),Date>=ymd("2015-01-01"),forecast==1) %>%
   #rbind(filter(steo_data_fetch(ymd("2020-2-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
   #rbind(filter(steo_data_fetch(ymd("2020-3-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
   rbind(filter(steo_data_fetch(ymd("2020-6-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
@@ -224,6 +224,7 @@ steo_old_sd_forecasts<-filter(steo_data_fetch(ymd("2020-1-1")),Date>=ymd("2015-0
   rbind(filter(steo_data_fetch(ymd("2021-6-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
   rbind(filter(steo_data_fetch(ymd("2022-1-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
   rbind(filter(steo_data_fetch(ymd("2022-6-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
+  rbind(filter(steo_data_fetch(floor_date(steo_date,unit="months")-months(1)),Date>=ymd("2015-01-01"),forecast==1))%>%
   filter(code %in% c("patc_world","papr_world"))%>%
   mutate(Region=as_factor(Region),
          Region=fct_collapse(Region,`Total World Supply` = c("Total World Supply", "Total World Production")),
@@ -259,8 +260,8 @@ demand<-ggplot(filter(graph_df,Region=="Total World Consumption",forecast==0))+
   #geom_line(data=budget_2020,aes(Date,WTI_CAD,colour="AB_Budget_2020",linetype="AB_Budget_2020"),size=1.5)+
   #geom_point(data=budget_2020,aes(Date,WTI_CAD,colour="AB_Budget_2020"),shape=21,size=2,fill="white")+
   
-  scale_shape_manual("",values=c(15,16,17,18,0,1,2))+
-  scale_size_manual("",values=c(0,rep(2.5,6)))+
+  scale_shape_manual("",values=c(15,16,17,18,0,1,2,3))+
+  scale_size_manual("",values=c(0,rep(2.5,7)))+
   scale_y_continuous(breaks=pretty_breaks())+
   #scale_linetype_manual("",values=c(1,1))+
   scale_color_viridis("",discrete = T,option="A",direction = -1,end = .9)+
@@ -301,8 +302,8 @@ ggsave("images/demand_small.jpg",width=16,height = 10,bg="white")
     #geom_point(data=budget_2020,aes(Date,WTI_CAD,colour="AB_Budget_2020"),shape=21,size=2,fill="white")+
     #scale_x_date(breaks = "12 months",date_labels = "%b\n%Y",expand = c(0,0))+
     #expand_limits(x=max(graph_df$Date+months(3)))+
-    scale_shape_manual("",values=c(15,16,17,18,0,1,2))+
-    scale_size_manual("",values=c(0,rep(2.5,6)))+
+    scale_shape_manual("",values=c(15,16,17,18,0,1,2,3))+
+    scale_size_manual("",values=c(0,rep(2.5,7)))+
     scale_y_continuous(breaks=pretty_breaks())+
     expand_limits(y=c(80,110))+
     #scale_linetype_manual("",values=c(1,1))+
