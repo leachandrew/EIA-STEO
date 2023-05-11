@@ -209,8 +209,8 @@ max_forecast<-max(supply_demand$Date[supply_demand$forecast==1])
 
 #historical demand forecasts
 steo_old_sd_forecasts<-filter(steo_data_fetch(ymd("2019-10-1")),Date>=ymd("2015-01-01"),forecast==1) %>%
-  #rbind(filter(steo_data_fetch(ymd("2020-2-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
-  #rbind(filter(steo_data_fetch(ymd("2020-3-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
+  rbind(filter(steo_data_fetch(ymd("2020-2-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
+  rbind(filter(steo_data_fetch(ymd("2020-3-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
   rbind(filter(steo_data_fetch(ymd("2020-6-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
   #rbind(filter(steo_data_fetch(ymd("2020-5-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
   #rbind(filter(steo_data_fetch(ymd("2020-7-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
@@ -234,8 +234,8 @@ steo_old_sd_forecasts<-filter(steo_data_fetch(ymd("2019-10-1")),Date>=ymd("2015-
 graph_df<-supply_demand%>%
   mutate(Region=as_factor(Region),
          Region=fct_collapse(Region,`Total World Supply` = c("Total World Supply", "Total World Production")),
-         version=factor(paste(format(max(supply_demand$version), "%b %Y"), "forecast"),
-                        levels=paste(month.abb[month(unique(version))],year(unique(version)),"forecast")))%>%
+         version=factor(format(max(supply_demand$version), "%b %Y"),
+                        levels=paste(month.abb[month(unique(version))],year(unique(version)))))%>%
   bind_rows(steo_old_sd_forecasts)%>%
   mutate(version=mdy(paste(substr(as.character(version),1,3),1,substr(as.character(version),4,8),sep=" ")),
          version=factor(format(version,"%b %Y forecast"),
@@ -243,7 +243,8 @@ graph_df<-supply_demand%>%
   NULL
   )
          
-forecast_label<-paste(format(max(supply_demand$version), "%b %Y"), "forecast")
+#forecast_label<-paste(format(max(supply_demand$version), "%b %Y"), "forecast",sep="")
+forecast_label<-format(max(supply_demand$version), "%b %Y")
 other_versions<-graph_df %>% filter(forecast==1,version!=forecast_label) %>% select(version) %>% unique()
 
 
@@ -260,8 +261,8 @@ demand<-ggplot(filter(graph_df,Region=="Total World Consumption",forecast==0))+
   #geom_line(data=budget_2020,aes(Date,WTI_CAD,colour="AB_Budget_2020",linetype="AB_Budget_2020"),size=1.5)+
   #geom_point(data=budget_2020,aes(Date,WTI_CAD,colour="AB_Budget_2020"),shape=21,size=2,fill="white")+
   
-  scale_shape_manual("",values=c(15,16,17,18,0,1,2,3))+
-  scale_size_manual("",values=c(0,rep(2.5,7)))+
+  scale_shape_manual("",values=c(15,16,17,18,0,1,2,3,4,5))+
+  scale_size_manual("",values=c(0,rep(2.5,9)))+
   scale_y_continuous(breaks=pretty_breaks())+
   #scale_linetype_manual("",values=c(1,1))+
   scale_color_viridis("",discrete = T,option="A",direction = -1,end = .9)+
