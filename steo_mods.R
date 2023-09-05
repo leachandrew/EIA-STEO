@@ -208,10 +208,10 @@ min_forecast<-min(supply_demand$Date[supply_demand$forecast==1])
 max_forecast<-max(supply_demand$Date[supply_demand$forecast==1])
 
 #historical demand forecasts
-steo_old_sd_forecasts<-filter(steo_data_fetch(ymd("2019-10-1")),Date>=ymd("2015-01-01"),forecast==1) %>%
+steo_old_sd_forecasts<-filter(steo_data_fetch(ymd("2019-12-1")),Date>=ymd("2015-01-01"),forecast==1) %>%
   #rbind(filter(steo_data_fetch(ymd("2020-2-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
   #rbind(filter(steo_data_fetch(ymd("2020-3-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
-  rbind(filter(steo_data_fetch(ymd("2020-6-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
+  rbind(filter(steo_data_fetch(ymd("2020-4-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
   #rbind(filter(steo_data_fetch(ymd("2020-5-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
   #rbind(filter(steo_data_fetch(ymd("2020-7-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
   #rbind(filter(steo_data_fetch(ymd("2020-7-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
@@ -220,11 +220,12 @@ steo_old_sd_forecasts<-filter(steo_data_fetch(ymd("2019-10-1")),Date>=ymd("2015-
   #rbind(filter(steo_data_fetch(ymd("2020-10-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
   #rbind(filter(steo_data_fetch(ymd("2020-11-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
   #rbind(filter(steo_data_fetch(ymd("2020-12-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
-  rbind(filter(steo_data_fetch(ymd("2021-1-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
-  rbind(filter(steo_data_fetch(ymd("2021-6-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
-  rbind(filter(steo_data_fetch(ymd("2022-1-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
-  rbind(filter(steo_data_fetch(ymd("2022-6-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
-  rbind(filter(steo_data_fetch(floor_date(steo_date,unit="months")-months(1)),Date>=ymd("2015-01-01"),forecast==1))%>%
+  #rbind(filter(steo_data_fetch(ymd("2021-1-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
+  #rbind(filter(steo_data_fetch(ymd("2021-6-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
+  #rbind(filter(steo_data_fetch(ymd("2022-1-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
+  #rbind(filter(steo_data_fetch(ymd("2022-6-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
+  #rbind(filter(steo_data_fetch(ymd("2023-1-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
+  #rbind(filter(steo_data_fetch(floor_date(steo_date,unit="months")-months(1)),Date>=ymd("2015-01-01"),forecast==1))%>%
   filter(code %in% c("patc_world","papr_world"))%>%
   mutate(Region=as_factor(Region),
          Region=fct_collapse(Region,`Total World Supply` = c("Total World Supply", "Total World Production")),
@@ -234,8 +235,8 @@ steo_old_sd_forecasts<-filter(steo_data_fetch(ymd("2019-10-1")),Date>=ymd("2015-
 graph_df<-supply_demand%>%
   mutate(Region=as_factor(Region),
          Region=fct_collapse(Region,`Total World Supply` = c("Total World Supply", "Total World Production")),
-         version=factor(paste(format(max(supply_demand$version), "%b %Y"), "forecast"),
-                        levels=paste(month.abb[month(unique(version))],year(unique(version)),"forecast")))%>%
+         version=factor(format(max(supply_demand$version), "%b %Y"),
+                        levels=paste(month.abb[month(unique(version))],year(unique(version)))))%>%
   bind_rows(steo_old_sd_forecasts)%>%
   mutate(version=mdy(paste(substr(as.character(version),1,3),1,substr(as.character(version),4,8),sep=" ")),
          version=factor(format(version,"%b %Y forecast"),
@@ -243,7 +244,8 @@ graph_df<-supply_demand%>%
   NULL
   )
          
-forecast_label<-paste(format(max(supply_demand$version), "%b %Y"), "forecast")
+#forecast_label<-paste(format(max(supply_demand$version), "%b %Y"), "forecast",sep="")
+forecast_label<-format(max(supply_demand$version), "%b %Y")
 other_versions<-graph_df %>% filter(forecast==1,version!=forecast_label) %>% select(version) %>% unique()
 
 
@@ -260,8 +262,8 @@ demand<-ggplot(filter(graph_df,Region=="Total World Consumption",forecast==0))+
   #geom_line(data=budget_2020,aes(Date,WTI_CAD,colour="AB_Budget_2020",linetype="AB_Budget_2020"),size=1.5)+
   #geom_point(data=budget_2020,aes(Date,WTI_CAD,colour="AB_Budget_2020"),shape=21,size=2,fill="white")+
   
-  scale_shape_manual("",values=c(15,16,17,18,0,1,2,3))+
-  scale_size_manual("",values=c(0,rep(2.5,7)))+
+  scale_shape_manual("",values=c(15,16,17,18,0,1,2,3,4,5))+
+  scale_size_manual("",values=c(0,rep(2.5,9)))+
   scale_y_continuous(breaks=pretty_breaks())+
   #scale_linetype_manual("",values=c(1,1))+
   scale_color_viridis("",discrete = T,option="A",direction = -1,end = .9)+
@@ -285,17 +287,27 @@ ggsave("images/demand.png",width=16,height = 10,dpi=res,bg="white")
 ggsave("images/demand_small.jpg",width=16,height = 10,bg="white")
 
 
+demand+
+  scale_x_date(limits=c(ymd("2018-01-01"),max_date+months(3)),breaks = "12 months",date_labels = "%b\n%Y",expand = c(0,0))+
+  labs(title = "",subtitle = "",caption = "")+
+  guides(shape = guide_legend(keywidth = unit(1.6,"cm"),nrow = 1),
+         linetype = guide_legend(keywidth = unit(1.6,"cm"),nrow = 1),
+         colour = guide_legend(keywidth = unit(1.6,"cm"),override.aes = list(lty = "11")  ,nrow = 2),
+         fill = guide_legend(keywidth = unit(1.6,"cm"),nrow = 1))
+ggsave("images/demand_plain.png",width=16,height = 10,dpi=300,bg="white")
+
+
   demand+
     scale_x_date(limits=c(ymd("2005-01-01"),max_date+months(3)),breaks = "12 months",date_labels = "%b\n%Y",expand = c(0,0))
   ggsave("images/demand_long.png",width=16,height = 10,dpi=res,bg="white")
   
   
   supply<-ggplot(filter(graph_df,Region=="Total World Supply",forecast==0))+
-    geom_line(aes(Date,value,group=version,linetype="Historic Data"),size=1.5)+
+    geom_line(aes(Date,value,group=version,linetype="Historic Data"),size=1)+
     geom_line(data=filter(graph_df,Region=="Total World Supply",forecast==1),
-              aes(Date,value,group=version,colour=version),lty="11",size=1.5)+
-    #geom_point(data=filter(graph_df,Region=="Total World Supply",forecast==1),
-    #           aes(Date,value,group=version,shape=version,colour=version,fill=version),size=2.5)+
+              aes(Date,value,group=version,colour=version),lty="11",size=1)+
+    geom_point(data=filter(graph_df,Region=="Total World Supply",forecast==1),
+               aes(Date,value,group=version,shape=version,colour=version,fill=version),size=2.5)+
     
     #geom_line(data=filter(wti_fc,Date>ymd("2013-01-01"),forecast==0),aes(Date,value,linetype="A"),size=1.5,colour="black")+
     #geom_line(data=budget_2020,aes(Date,WTI_CAD,colour="AB_Budget_2020",linetype="AB_Budget_2020"),size=1.5)+
@@ -305,7 +317,7 @@ ggsave("images/demand_small.jpg",width=16,height = 10,bg="white")
     scale_shape_manual("",values=c(15,16,17,18,0,1,2,3))+
     scale_size_manual("",values=c(0,rep(2.5,7)))+
     scale_y_continuous(breaks=pretty_breaks())+
-    expand_limits(y=c(80,110))+
+    expand_limits(y=c(80,105))+
     #scale_linetype_manual("",values=c(1,1))+
     scale_color_viridis("",discrete = T,option="A",direction = -1,end = .9)+
     scale_fill_viridis("",discrete = T,option="A",direction = -1,end=.9)+
@@ -313,8 +325,8 @@ ggsave("images/demand_small.jpg",width=16,height = 10,bg="white")
     #scale_fill_manual("",values=colors_tableau10()[2])+
     #ajl_line()+
     theme_minimal()+weekly_graphs()+
-    guides(shape = guide_legend(keywidth = unit(1.6,"cm"),nrow = 2),
-           linetype = guide_legend(keywidth = unit(1.6,"cm"),nrow = 2),
+    guides(shape = guide_legend(keywidth = unit(1.6,"cm"),nrow = 1),
+           linetype = guide_legend(keywidth = unit(1.6,"cm"),nrow = 1),
            colour = guide_legend(keywidth = unit(1.6,"cm"),override.aes = list(lty = "11")  ,nrow = 2),
            fill = guide_legend(keywidth = unit(1.6,"cm"),nrow = 2))+
     labs(y="Global Crude Oil Supply (million barrels per day)",x="",
@@ -326,6 +338,13 @@ ggsave("images/demand_small.jpg",width=16,height = 10,bg="white")
   supply+
     scale_x_date(limits=c(ymd("2018-01-01"),max_date+months(3)),breaks = "12 months",date_labels = "%b\n%Y",expand = c(0,0))
   ggsave("images/supply.png",width=16,height = 10,dpi=res,bg="white")
+  
+  supply+
+  scale_x_date(limits=c(ymd("2018-01-01"),max_date+months(3)),breaks = "12 months",date_labels = "%b\n%Y",expand = c(0,0))+
+    labs(title = "",subtitle = "",caption = "")
+  ggsave("images/supply_plain.png",width=16,height = 10,dpi=300,bg="white")
+  
+  
   ggsave("images/supply_small.png",width=16,height = 10,dpi=120,bg="white")
   supply+
     scale_x_date(limits=c(ymd("2005-01-01"),max_date+months(3)),breaks = "12 months",date_labels = "%b\n%Y",expand = c(0,0))
@@ -454,7 +473,7 @@ ggsave("images/demand_small.jpg",width=16,height = 10,bg="white")
            version=factor(paste(month.abb[month(version)],year(version),"forecast"),
                           levels=paste(month.abb[month(sort(unique(version)))],(year(sort(unique(version)))),"forecast")))
   
-  top_panel<-ggplot(filter(graph_df,Region=="OPEC",forecast==0,Date>ymd("2015-01-01")))+
+  top_panel<-ggplot(filter(graph_df,Region=="OPEC",forecast==0,Date>ymd("2005-01-01")))+
     geom_line(aes(Date,value,group=version,colour="Historic Data"),size=1.25)+
     geom_line(data=filter(graph_df,Region=="OPEC",forecast==1),
               aes(Date,value,group=version,colour=version),lty="11",size=1.25)+
@@ -491,21 +510,21 @@ ggsave("images/demand_small.jpg",width=16,height = 10,bg="white")
   
   
   
-  bottom_panel<-ggplot(filter(graph_df,Region=="Total non-OPEC liquids",forecast==0,Date>ymd("2015-01-01")))+
+  bottom_panel<-ggplot(filter(graph_df,Region=="Total non-OPEC liquids",forecast==0,Date>ymd("2005-01-01")))+
     geom_line(aes(Date,value,group=version,linetype="Historic Data"),size=1.25)+
     geom_line(data=filter(graph_df,Region=="Total non-OPEC liquids",forecast==1),
               aes(Date,value,group=version,colour=version,linetype="STEO Forecast"),size=1.25)+
     geom_point(data=filter(graph_df,Region=="Total non-OPEC liquids",forecast==1),
                aes(Date,ifelse(month(Date)%%2==0,value,NA),group=version,shape=version,colour=version,fill=version),size=2.5)+
-    geom_point(data=filter(graph_df,Region=="Total non-OPEC liquids",forecast==0,Date==ymd("2017-09-01")),
-             aes(Date,value,group=version),shape=21,size=20.5)+
-    annotate("text", x =ymd("2017-09-01"), y =65, label = str_wrap("I wonder what would happen if we radically increased production...",40),size=3.25,hjust=0.5,vjust=0.5)+  
+    #geom_point(data=filter(graph_df,Region=="Total non-OPEC liquids",forecast==0,Date==ymd("2017-09-01")),
+    #         aes(Date,value,group=version),shape=21,size=20.5)+
+    #annotate("text", x =ymd("2017-09-01"), y =65, label = str_wrap("I wonder what would happen if we radically increased production...",40),size=3.25,hjust=0.5,vjust=0.5)+  
     geom_point(data=filter(graph_df,Region=="Total non-OPEC liquids",forecast==0,Date==ymd("2019-12-01")),
                aes(Date,value,group=version),shape=21,size=20.5)+
     annotate("text", x =ymd("2019-12-01"), y =71, label = "Definitely Not A Price War!",size=3.25,hjust=0.5,vjust=0.5)+  
     geom_point(data=filter(graph_df,version=="Jan 2020 forecast",Region=="Total non-OPEC liquids",forecast==1,Date==ymd("2021-12-01")),
                aes(Date,value,group=version),shape=21,size=12.5)+
-    annotate("text", x =ymd("2021-12-01"), y =71, label = "Okay, maybe a bit",size=3.25,hjust=1,vjust=0.5)+  
+    #annotate("text", x =ymd("2021-12-01"), y =71, label = "Okay, maybe a bit",size=3.25,hjust=1,vjust=0.5)+  
     scale_x_date(breaks = "12 months",date_labels = "%b\n%Y")+
     scale_shape_manual("",values=c(15,16,17,18,0,1,2))+
     scale_size_manual("",values=c(0,rep(2.5,6)))+
