@@ -42,10 +42,6 @@ colors_ua10 <- function()
 }
 
 
-#Set EIA API Key
-
-KEY <- "91b4dca0b858df64a2279d82f71af240"
-
 
 #graph formats
 
