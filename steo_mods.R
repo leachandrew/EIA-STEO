@@ -272,10 +272,9 @@ demand<-ggplot(filter(graph_df,Region=="Total World Consumption",forecast==0))+
   #scale_fill_manual("",values=colors_tableau10()[2])+
   #ajl_line()+
   theme_minimal()+weekly_graphs()+
-  guides(shape = guide_legend(keywidth = unit(1.6,"cm"),nrow = 2),
-         linetype = guide_legend(keywidth = unit(1.6,"cm"),nrow = 2),
-         colour = guide_legend(keywidth = unit(1.6,"cm"),override.aes = list(lty = "11")  ,nrow = 2),
-         fill = guide_legend(keywidth = unit(1.6,"cm"),nrow = 2))+
+  guides(shape = guide_legend(keywidth = unit(1.6,"cm"),nrow = 1),
+         linetype = guide_legend(keywidth = unit(1.6,"cm"),nrow = 1),
+         colour = guide_legend(keywidth = unit(1.6,"cm"),override.aes = list(lty = "11")  ,nrow = 1))+
   labs(y="Global Liquids Demand (million barrels per day)",x="",
        title=paste("Global Liquids Demand and EIA Forecasts"),
        subtitle=paste("Historic Values and Short Term Energy Outlook Forecasts"),
