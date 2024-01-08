@@ -54,7 +54,8 @@ eia_fix_dates<-function(data_sent)
 steo_data_fetch<-function(date_sent){
 #for any month and year, get the STEO Price outlook
 #testing
-  #date_sent<-ymd("2015-01-01")
+  #date_sent<-ymd("2019-01-01")
+  #date_sent<-ymd("2013-12-01")
   #date_sent<-steo_date
   #month_sent should be lower case month.abb
 
@@ -64,20 +65,32 @@ year_sent<-sprintf('%02d', year(date_sent)%% 100)
 
 #before jun2013 they are xls files
 file_date<-ymd(paste(year_sent,month_sent,1,sep="-"))
+
 excel_file<-ifelse(file_date>ymd("2013-06-01"),
+                  paste0("data/steo_",month_sent,"_",year_sent,".xlsx"),
+                  paste0("data/steo_",month_sent,"_",year_sent,".xls"))
+
+download_file<-ifelse(file_date>ymd("2013-06-01"),
                    paste0("https://www.eia.gov/outlooks/steo/archives/",month_sent,year_sent,"_base.xlsx"),
                    paste0("https://www.eia.gov/outlooks/steo/archives/",month_sent,year_sent,"_base.xls"))
-temp_file<-ifelse(file_date>ymd("2013-06-01"),
-                  paste0("steo_",month_sent,"_",year_sent,".xlsx"),
-                  paste0("steo_",month_sent,"_",year_sent,".xls"))
-download.file(excel_file,mode = "wb",destfile = temp_file)
-  dates<-read_excel(path=temp_file,sheet = "2tab",range = "C3:C4",col_names = F)
-  names(dates)[1]<-"X__1"
+
+#jan23_base.xlsx
+
+
+
+
+#excel_file
+
+if(!file.exists(excel_file))
+  download.file(download_file,mode = "wb",destfile = excel_file)
+
+dates<-read_excel(path=excel_file,sheet = "2tab",range = "C3:C4",col_names = F)
+names(dates)[1]<-"X__1"
 year_start<-dates$X__1[1]
 month_start<-grep(dates$X__1[2],month.abb)
 
 #process price outlook
-price_outlook<-read_excel(path=temp_file,sheet = "2tab",range = "A5:BV40",na="n/a")
+price_outlook<-read_excel(path=excel_file,sheet = "2tab",range = "A5:BV40",na="n/a")
 names(price_outlook)<-c("code","Region",format(seq.Date(from=ymd(paste(year_start,month_start,1,sep="-")),by="1 month",length.out=72)))
 #drop electricity and refined product headers
 price_outlook<-price_outlook[-c(4,26),]
@@ -101,7 +114,7 @@ price_outlook<-price_outlook %>% mutate(
 #file ends up with columns code, Region, Header, Date, value, forecast, version
 
 #process non_opec_supply
-crude_supply_data<-read_excel(path=temp_file,sheet = "3atab",range = "A5:BV47",na="n/a")
+crude_supply_data<-read_excel(path=excel_file,sheet = "3atab",range = "A5:BV47",na="n/a")
 names(crude_supply_data)<-c("code","Region",format(seq.Date(from=ymd(paste(year_start,month_start,1,sep="-")),by="1 month",length.out=72)))
 crude_supply_data<-crude_supply_data[rowSums(is.na(crude_supply_data)) != ncol(crude_supply_data),]
 headers<-grep("TRUE",is.na(crude_supply_data[,1]))
@@ -123,7 +136,7 @@ crude_supply_data<-crude_supply_data %>% mutate(
 #file ends up with columns code, Region, Header, Date, value, forecast, version
 
 #process non_opec_supply
-non_opec_supply_data<-read_excel(path=temp_file,sheet = "3btab",range = "A5:BV50",na="n/a")
+non_opec_supply_data<-read_excel(path=excel_file,sheet = "3btab",range = "A5:BV50",na="n/a")
 names(non_opec_supply_data)<-c("code","Region",format(seq.Date(from=ymd(paste(year_start,month_start,1,sep="-")),by="1 month",length.out=72)))
 non_opec_supply_data<-non_opec_supply_data[rowSums(is.na(non_opec_supply_data)) != ncol(non_opec_supply_data),]
 non_opec_supply_data$Header<-"Petroleum Supply  (million barrels per day)"
@@ -135,7 +148,7 @@ non_opec_supply_data<-non_opec_supply_data %>% mutate(
   version=file_date)
 
 #process opec_data
-opec_supply_data<-read_excel(path=temp_file,sheet = "3ctab",range = "A4:BV55",na=c("n/a","-"))
+opec_supply_data<-read_excel(path=excel_file,sheet = "3ctab",range = "A4:BV55",na=c("n/a","-"))
 names(opec_supply_data)<-c("code","Region",format(seq.Date(from=ymd(paste(year_start,month_start,1,sep="-")),by="1 month",length.out=72)))
 opec_supply_data<-opec_supply_data[rowSums(is.na(opec_supply_data)) != ncol(opec_supply_data),]
 opec_supply_data$Header<-NA
@@ -147,7 +160,10 @@ for(j in headers){
 }
 opec_supply_data<-opec_supply_data %>% fill(Header)
 opec_supply_data<-opec_supply_data[!is.na(opec_supply_data$code),]
-opec_supply_data<-opec_supply_data %>% pivot_longer(cols=-c("code","Region","Header"),names_to = "Date",values_to ="value")
+opec_supply_data<-opec_supply_data %>% 
+  relocate(Header,.after=Region)%>%
+  mutate(across(2:last_col(), ~ as.numeric(.)))%>%
+  pivot_longer(cols=-c("code","Region","Header"),names_to = "Date",values_to ="value")
 opec_supply_data$table<-"3ctab"
 opec_supply_data<-opec_supply_data %>% mutate(
   Date=ymd(Date),
@@ -163,7 +179,7 @@ steo_data
 }
 
 
-#steo_data<-steo_data_fetch(ymd("2018-12-1"))
+#steo_data<-steo_data_fetch(ymd("2013-12-1"))
 
 #get historic data
 #steo_data<-steo_data_fetch(ymd("2018-12-1"))
@@ -212,14 +228,9 @@ steo_old_sd_forecasts<-filter(steo_data_fetch(ymd("2019-12-1")),Date>=ymd("2015-
   #rbind(filter(steo_data_fetch(ymd("2020-2-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
   #rbind(filter(steo_data_fetch(ymd("2020-3-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
   rbind(filter(steo_data_fetch(ymd("2020-4-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
-  #rbind(filter(steo_data_fetch(ymd("2020-5-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
-  #rbind(filter(steo_data_fetch(ymd("2020-7-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
-  #rbind(filter(steo_data_fetch(ymd("2020-7-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
-  #rbind(filter(steo_data_fetch(ymd("2020-8-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
-  #rbind(filter(steo_data_fetch(ymd("2020-9-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
-  #rbind(filter(steo_data_fetch(ymd("2020-10-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
-  #rbind(filter(steo_data_fetch(ymd("2020-11-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
-  #rbind(filter(steo_data_fetch(ymd("2020-12-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
+  rbind(filter(steo_data_fetch(ymd("2020-12-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
+  rbind(filter(steo_data_fetch(ymd("2021-12-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
+  rbind(filter(steo_data_fetch(ymd("2022-12-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
   #rbind(filter(steo_data_fetch(ymd("2021-1-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
   #rbind(filter(steo_data_fetch(ymd("2021-6-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
   #rbind(filter(steo_data_fetch(ymd("2022-1-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
@@ -251,10 +262,16 @@ other_versions<-graph_df %>% filter(forecast==1,version!=forecast_label) %>% sel
 
 max_date<-max(graph_df$Date)
 
-demand<-ggplot(filter(graph_df,Region=="Total World Consumption",forecast==0))+
-  geom_line(aes(Date,value,group=version,linetype="Historic Data"),size=1.25)+
-  geom_line(data=filter(graph_df,Region=="Total World Consumption",forecast==1),
+demand<-
+  ggplot(filter(graph_df,Region=="Total World Consumption",forecast==0))+
+  geom_line(data=filter(graph_df,Region=="Total World Consumption"),
             aes(Date,value,group=version,colour=version),lty="11",size=1.25)+
+  geom_line(aes(Date,value,group=version,linetype="Historic Data"),size=1.25)+
+  
+  
+  #geom_line(data=filter(graph_df,Region=="Total World Consumption",forecast==1),
+  #          aes(Date,value,group=version,colour=version),lty="11",size=1.25)+
+  
   geom_point(data=filter(graph_df,Region=="Total World Consumption",forecast==1),
              aes(Date,value,group=version,shape=version,colour=version,fill=version),size=2.5)+
   
@@ -272,9 +289,9 @@ demand<-ggplot(filter(graph_df,Region=="Total World Consumption",forecast==0))+
   #scale_fill_manual("",values=colors_tableau10()[2])+
   #ajl_line()+
   theme_minimal()+weekly_graphs()+
-  guides(shape = guide_legend(keywidth = unit(1.6,"cm"),nrow = 1),
-         linetype = guide_legend(keywidth = unit(1.6,"cm"),nrow = 1),
-         colour = guide_legend(keywidth = unit(1.6,"cm"),override.aes = list(lty = "11")  ,nrow = 1))+
+  guides(shape = guide_legend(keywidth = unit(1.6,"cm"),nrow = 2),
+         linetype = guide_legend(keywidth = unit(1.6,"cm"),nrow = 2),
+         colour = guide_legend(keywidth = unit(1.6,"cm"),override.aes = list(lty = "11")  ,nrow = 2))+
   labs(y="Global Liquids Demand (million barrels per day)",x="",
        title=paste("Global Liquids Demand and EIA Forecasts"),
        subtitle=paste("Historic Values and Short Term Energy Outlook Forecasts"),
@@ -472,34 +489,22 @@ ggsave("images/demand_plain.png",width=16,height = 10,dpi=300,bg="white")
            version=factor(paste(month.abb[month(version)],year(version),"forecast"),
                           levels=paste(month.abb[month(sort(unique(version)))],(year(sort(unique(version)))),"forecast")))
   
-  top_panel<-ggplot(filter(graph_df,Region=="OPEC",forecast==0,Date>ymd("2005-01-01")))+
-    geom_line(aes(Date,value,group=version,colour="Historic Data"),size=1.25)+
+  top_panel<-
+    ggplot(filter(graph_df,Region=="OPEC",forecast==0,Date>ymd("2005-01-01")))+
+    geom_line(aes(Date,value,group=version,colour="A"),size=1.25)+
+    
     geom_line(data=filter(graph_df,Region=="OPEC",forecast==1),
-              aes(Date,value,group=version,colour=version),lty="11",size=1.25)+
+              aes(Date,value,group=version,colour="EIA Forecast"),lty="11",size=1.25)+
     geom_point(data=filter(graph_df,Region=="OPEC",forecast==1),
-               aes(Date,ifelse(month(Date)%%3==0,value,NA),group=version,colour=version),shape=15,size=2.5)+
+               aes(Date,ifelse(month(Date)%%3==0,value,NA),group=version,colour="EIA Forecast"),shape=15,size=2.5)+
     geom_point(data=filter(graph_df,Region=="OPEC",forecast==0,Date==ymd("2020-04-01")),
                aes(Date,value,group=version),shape=21,size=7.5)+
     annotate("text", x =ymd("2020-04-01"), y =37, label = "Price War!",size=3.25,hjust=0.5,vjust=0.5)+  
-    #geom_line(data=filter(wti_fc,Date>ymd("2013-01-01"),forecast==0),aes(Date,value,linetype="A"),size=1.5,colour="black")+
-    #geom_line(data=budget_2020,aes(Date,WTI_CAD,colour="AB_Budget_2020",linetype="AB_Budget_2020"),size=1.5)+
-    #geom_point(data=budget_2020,aes(Date,WTI_CAD,colour="AB_Budget_2020"),shape=21,size=2,fill="white")+
     scale_x_date(breaks = "12 months",date_labels = "%b\n%Y")+
-    #scale_shape_manual("",values=c(15,16,17,18,0,1,2))+
-    #scale_size_manual("",values=c(0,rep(2.5,6)))+
     scale_y_continuous(breaks=pretty_breaks())+
-    #scale_linetype_manual("",values=c(1,1))+
-    scale_color_viridis("",discrete = T,option="A",direction = 1,end = .9)+
-    #scale_fill_viridis("",discrete = T,option="A",direction = -1,end=.9)+
-    #scale_linetype_manual("",values=c(1,2),labels=c("Historical Data","Forecast"))+
-    #scale_fill_manual("",values=colors_tableau10()[2])+
-    #ajl_line()+
-    #theme_minimal()+weekly_graphs()+
-    guides(#shape = guide_legend(keywidth = unit(1.6,"cm"),nrow = 2),
-           #linetype = guide_legend(keywidth = unit(1.6,"cm"),nrow = 2),
-           #colour = guide_legend(keywidth = unit(1.6,"cm"),nrow = 2),
-           colour = guide_legend(keywidth = unit(1.6,"cm"),override.aes = list(lty = c("solid","11"),shape = c(NA,15)),nrow = 1),
-           #fill = guide_legend(keywidth = unit(1.6,"cm"),nrow = 2),
+    scale_color_viridis("",discrete = T,option="mako",direction = 1,end = .5,begin = 0, labels=c("Historic Data",forecast_label))+
+    
+    guides(colour = guide_legend(keywidth = unit(1.6,"cm"),override.aes = list(lty = c("solid","11"),shape = c(NA,15)),nrow = 1),
            NULL
            )+
     labs(y="Total Supply (mm bbl/d)",x="",
@@ -509,19 +514,15 @@ ggsave("images/demand_plain.png",width=16,height = 10,dpi=300,bg="white")
   
   
   
-  bottom_panel<-ggplot(filter(graph_df,Region=="Total non-OPEC liquids",forecast==0,Date>ymd("2005-01-01")))+
-    geom_line(aes(Date,value,group=version,linetype="Historic Data"),size=1.25)+
+  bottom_panel<-
+    ggplot(filter(graph_df,Region=="Total non-OPEC liquids",forecast==0,Date>ymd("2005-01-01")))+
+    geom_line(aes(Date,value,group=version,colour="A"),size=1.25)+
     geom_line(data=filter(graph_df,Region=="Total non-OPEC liquids",forecast==1),
-              aes(Date,value,group=version,colour=version,linetype="STEO Forecast"),size=1.25)+
+              aes(Date,value,group=version,colour="EIA Forecast"),lty="11",size=1.25)+
     geom_point(data=filter(graph_df,Region=="Total non-OPEC liquids",forecast==1),
-               aes(Date,ifelse(month(Date)%%2==0,value,NA),group=version,shape=version,colour=version,fill=version),size=2.5)+
-    #geom_point(data=filter(graph_df,Region=="Total non-OPEC liquids",forecast==0,Date==ymd("2017-09-01")),
-    #         aes(Date,value,group=version),shape=21,size=20.5)+
-    #annotate("text", x =ymd("2017-09-01"), y =65, label = str_wrap("I wonder what would happen if we radically increased production...",40),size=3.25,hjust=0.5,vjust=0.5)+  
-    geom_point(data=filter(graph_df,Region=="Total non-OPEC liquids",forecast==0,Date==ymd("2019-12-01")),
-               aes(Date,value,group=version),shape=21,size=20.5)+
+               aes(Date,ifelse(month(Date)%%3==0,value,NA),group=version,colour="EIA Forecast"),shape=15,size=2.5)+
     annotate("text", x =ymd("2019-12-01"), y =71, label = "Definitely Not A Price War!",size=3.25,hjust=0.5,vjust=0.5)+  
-    geom_point(data=filter(graph_df,version=="Jan 2020 forecast",Region=="Total non-OPEC liquids",forecast==1,Date==ymd("2021-12-01")),
+    geom_point(data=filter(graph_df,Region=="Total non-OPEC liquids",Date==ymd("2019-12-01")),
                aes(Date,value,group=version),shape=21,size=12.5)+
     #annotate("text", x =ymd("2021-12-01"), y =71, label = "Okay, maybe a bit",size=3.25,hjust=1,vjust=0.5)+  
     scale_x_date(breaks = "12 months",date_labels = "%b\n%Y")+
@@ -529,17 +530,11 @@ ggsave("images/demand_plain.png",width=16,height = 10,dpi=300,bg="white")
     scale_size_manual("",values=c(0,rep(2.5,6)))+
     scale_y_continuous(breaks=pretty_breaks())+
     #scale_linetype_manual("",values=c(1,1))+
-    scale_color_viridis("",discrete = T,option="A",direction = -1,end = .9)+
-    scale_fill_viridis("",discrete = T,option="A",direction = -1,end=.9)+
-    scale_linetype_manual("",values=c(1,2),labels=c("Historical Data","Forecast"))+
-    #scale_fill_manual("",values=colors_tableau10()[2])+
-    #ajl_line()+
-    #theme_minimal()+weekly_graphs()+
+    scale_color_viridis("",discrete = T,option="mako",direction = 1,end = .5,begin = 0, labels=c("Historic Data",forecast_label))+
+    guides(colour = guide_legend(keywidth = unit(1.6,"cm"),override.aes = list(lty = c("solid","11"),shape = c(NA,15)),nrow = 1),
+           NULL
+    )+
     blake_theme()+
-    guides(shape = guide_legend(keywidth = unit(1.6,"cm"),nrow = 2),
-           linetype = guide_legend(keywidth = unit(1.6,"cm"),nrow = 2),
-           colour = guide_legend(keywidth = unit(1.6,"cm"),nrow = 2),
-           fill = guide_legend(keywidth = unit(1.6,"cm"),nrow = 2))+
     labs(y="Total Supply (mm bbl/d)",x="",
          title=paste("Estimated Total Non-OPEC Liquids Supply and EIA Forecasts"),
          subtitle=paste("Historic Values and Forecasts from EIA Short Term Energy Outlook"),
@@ -938,7 +933,7 @@ ggsave("images/demand_plain.png",width=16,height = 10,dpi=300,bg="white")
   
   
   
-  #download.file("ftp://ftp.cmegroup.com/pub/settle/nymex_future.csv",destfile = "nymex_futures_dec28.csv")
+  #download.file("ftp://ftp.cmegroup.com/pub/settle/nymex_future.csv",destfile = "nymex_futures.csv")
   
   
   nymex_wti<-read_csv(nymex_file)%>%clean_names()%>%
