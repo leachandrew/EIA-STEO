@@ -215,7 +215,7 @@ steo_data<-rbind(steo_history,steo_forecast)
 
 #global supply and demand
 #the brackets mess up filter, so this is a fix
-supply_demand<-steo_data %>%filter(code %in% c("patc_world","papr_world"))%>%
+supply_demand<-steo_data %>%filter(code %in% c("patc_world","papr_world"),table=="3atab")%>%
   mutate(Region=as_factor(Region),
          Region=fct_collapse(Region,`Total World Supply` = c("Total World Supply", "Total World Production")))
 #find forecast dates
@@ -234,7 +234,7 @@ steo_old_sd_forecasts<-filter(steo_data_fetch(ymd("2019-12-1")),Date>=ymd("2015-
   rbind(filter(steo_data_fetch(ymd("2024-12-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
   rbind(filter(steo_data_fetch(ymd("2025-12-1")),Date>=ymd("2015-01-01"),forecast==1))%>%
   #rbind(filter(steo_data_fetch(floor_date(steo_date,unit="months")-months(1)),Date>=ymd("2015-01-01"),forecast==1))%>%
-  filter(code %in% c("patc_world","papr_world"))%>%
+  filter(code %in% c("patc_world","papr_world"),table=="3atab")%>%
   mutate(Region=as_factor(Region),
          Region=fct_collapse(Region,`Total World Supply` = c("Total World Supply", "Total World Production")),
          version=factor(paste(month.abb[month(version)],year(version),"forecast"),
@@ -314,44 +314,47 @@ ggsave("images/demand_plain.png",width=16,height = 10,dpi=300,bg="white")
   demand+
     scale_x_date(limits=c(ymd("2005-01-01"),max_date+months(3)),breaks = "12 months",date_labels = "%b\n%Y",expand = c(0,0))
   ggsave("images/demand_long.png",width=16,height = 10,dpi=res,bg="white")
+
   
   
-  supply<-ggplot(filter(graph_df,Region=="Total World Supply",forecast==0))+
+  supply<-
+    graph_df%>% filter(code=="papr_world",forecast==0)%>%
+    ggplot()+
     geom_line(aes(Date,value,group=version,linetype="Historic Data"),size=1)+
-    geom_line(data=filter(graph_df,Region=="Total World Supply",forecast==1),
+    geom_line(data=filter(graph_df,code=="papr_world",forecast==1),
               aes(Date,value,group=version,colour=version),lty="11",size=1)+
-    geom_point(data=filter(graph_df,Region=="Total World Supply",forecast==1),
+    geom_point(data=filter(graph_df,code=="papr_world",forecast==1),
                aes(Date,value,group=version,shape=version,colour=version,fill=version),size=2.5)+
-    
-    #geom_line(data=filter(wti_fc,Date>ymd("2013-01-01"),forecast==0),aes(Date,value,linetype="A"),size=1.5,colour="black")+
-    #geom_line(data=budget_2020,aes(Date,WTI_CAD,colour="AB_Budget_2020",linetype="AB_Budget_2020"),size=1.5)+
-    #geom_point(data=budget_2020,aes(Date,WTI_CAD,colour="AB_Budget_2020"),shape=21,size=2,fill="white")+
-    #scale_x_date(breaks = "12 months",date_labels = "%b\n%Y",expand = c(0,0))+
-    #expand_limits(x=max(graph_df$Date+months(3)))+
-    scale_shape_manual("",values=c(15,16,17,18,0,1,2,3))+
-    scale_size_manual("",values=c(0,rep(2.5,7)))+
+    scale_shape_manual("",values=c(15,16,17,18,0,1,2,5,7,8))+
+    scale_size_manual("",values=c(0,rep(2.5,8)))+
     scale_y_continuous(breaks=pretty_breaks())+
-    expand_limits(y=c(80,105))+
+    expand_limits(y=c(85,115))+
     #scale_linetype_manual("",values=c(1,1))+
     scale_color_viridis("",discrete = T,option="A",direction = -1,end = .9)+
     scale_fill_viridis("",discrete = T,option="A",direction = -1,end=.9)+
     scale_linetype_manual("",values=c("solid","11"),labels=c("Historical Data","Forecast"))+
     #scale_fill_manual("",values=colors_tableau10()[2])+
     #ajl_line()+
-    theme_minimal()+weekly_graphs()+
-    guides(shape = guide_legend(keywidth = unit(1.6,"cm"),nrow = 1),
-           linetype = guide_legend(keywidth = unit(1.6,"cm"),nrow = 1),
+    theme_irpp()+
+    guides(shape = guide_legend(keywidth = unit(1.6,"cm"),nrow = 2),
+           linetype = guide_legend(keywidth = unit(1.6,"cm"),nrow = 2),
            colour = guide_legend(keywidth = unit(1.6,"cm"),override.aes = list(lty = "11")  ,nrow = 2),
            fill = guide_legend(keywidth = unit(1.6,"cm"),nrow = 2))+
     labs(y="Global Crude Oil Supply (million barrels per day)",x="",
-         title=paste("Global Liquids Supply and EIA Forecasts"),
-         subtitle=paste("Historic Values and Short Term Energy Outlook Forecasts"),
+         title=paste("Global Liquids Supply and EIA Short-term Energy Outlook (STEO) Forecasts"),
+         #subtitle=paste("Historic Values and Short Term Energy Outlook Forecasts"),
          caption="Source: Data via EIA STEO, graph by Andrew Leach.")
   
   
   supply+
-    scale_x_date(limits=c(ymd("2018-01-01"),max_date+months(3)),breaks = "12 months",date_labels = "%b\n%Y",expand = c(0,0))
-  ggsave("images/supply.png",width=16,height = 10,dpi=res,bg="white")
+    scale_x_date(limits=c(ymd("2018-01-01"),max_date+months(3)),breaks = "12 months",date_labels = "%b\n%Y",expand = c(0,0))+
+    theme_irpp(base_size = 14)+
+    theme(legend.box = "vertical",
+    legend.key.height = unit(0.05, "cm"),
+    legend.box.spacing = unit(0.1, "cm"), 
+    # Reduce margin around the entire legend border
+    legend.margin = margin(t = 0, r = 0, b = 0, l = 0, unit = "pt"))
+  ggsave("images/supply.png",width=11.1,height = 6,dpi=res,bg="white")
   
   supply+
   scale_x_date(limits=c(ymd("2018-01-01"),max_date+months(3)),breaks = "12 months",date_labels = "%b\n%Y",expand = c(0,0))+
@@ -494,7 +497,6 @@ ggsave("images/demand_plain.png",width=16,height = 10,dpi=300,bg="white")
   
   #historical demand forecasts
   get_old_wti<-function(){
-    steo_old_WTI_forecasts<-
       filter(steo_data_fetch(ymd("2009-1-1")),forecast==1) %>%
       #bind_rows(filter(steo_data_fetch(ymd("2009-1-1")),forecast==1))%>%
       bind_rows(filter(steo_data_fetch(ymd("2011-1-1")),forecast==1))%>%
@@ -516,7 +518,6 @@ ggsave("images/demand_plain.png",width=16,height = 10,dpi=300,bg="white")
            Region=as_factor(Region),
            version=factor(paste(month.abb[month(version)],year(version),"STEO"),
                           levels=paste(month.abb[month(unique(version))],year(unique(version)),"STEO")))
-  steo_old_WTI_forecasts
     }
   
   #steo_old_WTI_forecasts<-get_old_wti()
@@ -529,11 +530,10 @@ ggsave("images/demand_plain.png",width=16,height = 10,dpi=300,bg="white")
     mutate(Region=as_factor(Region),
            version=factor(paste(format(max(version), "%b %Y"), "STEO"),
                           levels=paste(month.abb[month(unique(version))],year(unique(version)),"STEO")))%>%
-    as.data.frame()%>%
     bind_rows(steo_old_WTI_forecasts)%>%
     mutate(version=mdy(paste(substr(as.character(version),1,3),1,substr(as.character(version),4,8),sep=" ")))%>%
-    mutate(version=factor(paste(month.abb[month(version)],year(version),"EIA STEO forecast",sep = " "),
-                          levels=paste(month.abb[month(unique(sort(version)))],year(unique(sort(version))),"EIA STEO forecast"))
+    mutate(version=factor(paste(month.abb[month(version)],year(version),"forecast",sep = " "),
+                          levels=paste(month.abb[month(unique(sort(version)))],year(unique(sort(version))),"forecast"))
     )
   
   shape_set<-c(0,1,2,5,6,15,16,17,18,19)
@@ -543,41 +543,34 @@ ggsave("images/demand_plain.png",width=16,height = 10,dpi=300,bg="white")
                 "4284B4F4", "228F61A4")
   
   wti_graph<-
-    ggplot(wti_fc%>%mutate(version=gsub(" EIA STEO","",version),
-                           version=as_factor(version),
-                           version=fct_relevel(version,"Feb 2024 forecast",after=Inf)))+
+    wti_fc%>%
+    ggplot()+
     #geom_line(data=nymex_wti,aes(Date,value,group=version,linetype=version),size=1.15)+
-    geom_line(aes(Date,value,group=version,colour=version),linetype="solid",size=1.15)+
-    geom_line(data=steo_data%>%filter(code=="WTIPUUS",forecast==0),aes(Date,value,linetype="Monthly Average WTI Prices"),size=1.15)+
+    geom_line(aes(Date,value,group=version,colour=version),linetype="11",size=1.5)+
+    geom_line(data=steo_data%>%filter(code=="WTIPUUS",forecast==0),aes(Date,value,linetype="Historic Monthly Average WTI Prices"),size=1.5)+
     
     #geom_point(aes(Date,ifelse(month(Date) %in% c(6,12),value,NA),group=version,colour=version,shape=version),size=2.15)+
     scale_x_date(breaks = "24 months",date_labels = "%Y",expand=c(0,0))+
     scale_shape_manual("",values=c(shape_set,shape_set))+ #skipped 19
-    scale_y_continuous(breaks=pretty_breaks(),expand=c(.20,.20))+
-    # expand_limits(y=0)+
-    expand_limits(x=ymd("2022-01-01"))+
-    #scale_linetype_manual("",values=c(1,1))+
-    #scale_color_viridis("",discrete = T,option="C",direction = 1,end = .9)+
+    scale_y_continuous(breaks=pretty_breaks())+
+    expand_limits(y=0)+
+    expand_limits(x=ymd("2028-01-01"))+
     scale_color_manual("",values = c(colors_tableau10()[-8],colors_tableau10_light()[-8],"grey80"))+
-    #scale_color_manual("",values = c("grey80"))+
-    
     scale_linetype_manual("",values=c("solid",linetypes[1]))+
-    #scale_fill_manual("",values=colors_tableau10()[2])+
-    #ajl_line()+
-    weekly_graphs()+
-    #work_theme()+
-    theme(plot.caption = element_blank())+#no caption
-    guides(linetype = guide_legend(keywidth = unit(1,"cm"),nrow = 5),
-           shape = guide_legend(keywidth = unit(1,"cm"),nrow =  4),
-           colour = guide_legend(keywidth = unit(1,"cm"),nrow = 4),
+    theme_irpp(base_size = 16)+
+    theme(legend.key.width =unit(1,"cm"),
+          legend.key.height =unit(0.1,"cm"))+
+    guides(linetype = guide_legend(keywidth = unit(2,"cm"),nrow = 4),
+           shape = guide_legend(keywidth = unit(2,"cm"),nrow =  4),
+           colour = guide_legend(keywidth = unit(2,"cm"),nrow = 4),
            NA
     )+
     labs(y="WTI Spot Monthly Average ($/bbl)",x="",
          #title=paste("WTI Monthly Average Spot Price History and Forecasts"),
          #subtitle=paste("Historic Values, EIA STEO Forecasts through ",format(max(supply_demand$version), "%B %Y"),", and ",nymex_version," settlements.",sep=""),
-         caption="Source: Data via CME Group and EIA, graph by Andrew Leach.")
+         caption="Source: Data via EIA, graph by Andrew Leach.")
   wti_graph
-  ggsave("images/wti_fcast_nymex.png",width=16,height = 9,dpi=res,bg="white")
+  ggsave("images/wti_fcast_steo.png",width=13,height = 6,dpi=res,bg="white")
   
   
   
