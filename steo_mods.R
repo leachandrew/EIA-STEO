@@ -8,7 +8,7 @@ library(cowplot)
 library(ggthemes)
 library(rvest)
 library(viridis)
-
+library(gridExtra)
 #devtools::install_github("leachandrew/pdfetch")
 
 res<-150
@@ -419,13 +419,11 @@ ggsave("images/demand_plain.png",width=16,height = 10,dpi=300,bg="white")
     geom_point(data=filter(graph_df,Region=="OPEC",forecast==0,Date==ymd("2020-04-01")),
                aes(Date,value,group=version),shape=21,size=7.5)+
     annotate("text", x =ymd("2020-04-01"), y =37, label = "Price War!",size=3.25,hjust=0.5,vjust=0.5)+  
-    scale_x_date(breaks = "12 months",date_labels = "%b\n%Y")+
+    scale_x_date(breaks = "2 years",date_labels = "%b\n%Y")+
     scale_y_continuous(breaks=pretty_breaks())+
     scale_color_viridis("",discrete = T,option="mako",direction = 1,end = .5,begin = 0, labels=c("Historic Data",forecast_label))+
     
-    guides(colour = guide_legend(keywidth = unit(1.6,"cm"),override.aes = list(lty = c("solid","11"),shape = c(NA,15)),nrow = 1),
-           NULL
-           )+
+    guides(colour =  NULL  )+
     labs(y="Total Supply (mm bbl/d)",x="",
          title=paste("Estimated Total OPEC Liquids Supply and EIA Forecasts"),
          subtitle=paste("Historic Values and Forecasts from EIA Short Term Energy Outlook"),
@@ -444,15 +442,13 @@ ggsave("images/demand_plain.png",width=16,height = 10,dpi=300,bg="white")
     geom_point(data=filter(graph_df,Region=="Total non-OPEC liquids",Date==ymd("2019-12-01")),
                aes(Date,value,group=version),shape=21,size=12.5)+
     #annotate("text", x =ymd("2021-12-01"), y =71, label = "Okay, maybe a bit",size=3.25,hjust=1,vjust=0.5)+  
-    scale_x_date(breaks = "12 months",date_labels = "%b\n%Y")+
+    scale_x_date(breaks = "2 years",date_labels = "%b\n%Y")+
     scale_shape_manual("",values=c(15,16,17,18,0,1,2))+
     scale_size_manual("",values=c(0,rep(2.5,6)))+
     scale_y_continuous(breaks=pretty_breaks())+
     #scale_linetype_manual("",values=c(1,1))+
     scale_color_viridis("",discrete = T,option="mako",direction = 1,end = .5,begin = 0, labels=c("Historic Data",forecast_label))+
-    guides(colour = guide_legend(keywidth = unit(1.6,"cm"),override.aes = list(lty = c("solid","11"),shape = c(NA,15)),nrow = 1),
-           NULL
-    )+
+    guides(colour =  NULL)+
     blake_theme()+
     labs(y="Total Supply (mm bbl/d)",x="",
          title=paste("Estimated Total Non-OPEC Liquids Supply and EIA Forecasts"),
@@ -477,7 +473,7 @@ ggsave("images/demand_plain.png",width=16,height = 10,dpi=300,bg="white")
                                              NULL ),
                              
   top_panel+ blake_theme()+
-              theme(legend.position="bottom",
+              theme(legend.position="none",
                     plot.title = element_text(face="bold",size=rel(.7)),
                 plot.subtitle = element_blank(),
                     NULL)
